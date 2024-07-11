@@ -1,0 +1,44 @@
+From 17d00bc0f1e3589151796c7e99a37cd508f7d759 Mon Sep 17 00:00:00 2001
+From: "Aluisio (ZyZy) Victal" <alvictal@gmail.com>
+Date: Mon, 13 May 2024 13:03:18 +0000
+Subject: [PATCH] fix: Adding ifdef config to avoid unusable variables
+
+---
+ vvcam/isp/isp_isr.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+--- a/vvcam/isp/isp_isr.c
++++ b/vvcam/isp/isp_isr.c
+@@ -144,6 +144,7 @@ int update_dma_buffer(struct isp_ic_dev *dev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_VIDEOBUF2_DMA_CONTIG
+ static void isr_process_frame(struct isp_ic_dev *dev)
+ {
+ 	int i;
+@@ -164,6 +165,7 @@ static void isr_process_frame(struct isp_ic_dev *dev)
+ 	tasklet_schedule(&dev->tasklet);
+ 	return;
+ }
++#endif
+ 
+ void isp_isr_tasklet(unsigned long arg)
+ {
+@@ -250,11 +252,13 @@ void isp_clear_interrupts(struct isp_ic_dev *dev)
+ irqreturn_t isp_hw_isr(int irq, void *data)
+ {
+ 	struct isp_ic_dev *dev = (struct isp_ic_dev *)data;
++#ifdef CONFIG_VIDEOBUF2_DMA_CONTIG
+ 	static const u32 frameendmask = MRV_MI_MP_FRAME_END_MASK |
+ #ifdef ISP_MI_BP
+ 			MRV_MI_BP_FRAME_END_MASK |
+ #endif
+ 			MRV_MI_SP_FRAME_END_MASK;
++#endif
+ 	static const u32 errormask = MRV_MI_WRAP_MP_Y_MASK |
+ 			MRV_MI_WRAP_MP_CB_MASK |
+ 			MRV_MI_WRAP_MP_CR_MASK |
+-- 
+2.25.1
+
