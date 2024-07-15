@@ -17,7 +17,8 @@
 
 
 /* GPIOs related to EG91 LTE connected in Arcturus*/
-#define EG91_WDISABLE   IMX_GPIO_NR(4,14) //PIN -120
+#define EG91_VBAT       IMX_GPIO_NR(4,14) //PIN -120
+#define EG91_WDISABLE   IMX_GPIO_NR(3,23) //PIN 88-107
 #define EG91_PWR        IMX_GPIO_NR(3,24) //PIN 89-108
 #define EG91_RST        IMX_GPIO_NR(3,25) //PIN 90-109
 
