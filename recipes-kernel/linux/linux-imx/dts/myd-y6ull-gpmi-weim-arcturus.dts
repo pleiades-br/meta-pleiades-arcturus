@@ -95,6 +95,12 @@
 	status = "okay";
 };
 
+&fec2 {
+    mdio {
+        /delete-node/ ethphy0;
+    };
+};
+
 &uart4 {
     status = "disabled";
 };
