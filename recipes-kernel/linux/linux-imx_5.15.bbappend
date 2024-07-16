@@ -17,6 +17,6 @@ copy_arcturus_files() {
     cp -f defconfig_arcturus ${S}/arch/arm/configs/
 }
 
-DEPENDS = "firmware-imx"
+DEPENDS += " firmware-imx"
 
 
