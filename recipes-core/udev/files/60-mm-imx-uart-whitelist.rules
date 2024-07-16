@@ -1,0 +1,4 @@
+ACTION!="add|change|move", GOTO="mm_platform_device_whitelist_end"
+SUBSYSTEM!="platform", GOTO="mm_platform_device_whitelist_end"
+DRIVERS=="imx-uart", ENV{ID_MM_PLATFORM_DRIVER_PROBE}="1"
+LABEL="mm_platform_device_whitelist_end"

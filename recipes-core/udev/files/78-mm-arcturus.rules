@@ -1,6 +1,6 @@
-ACTION!="add|change|move|bind", GOTO="mm_eg91_uart1_end"
+ACTION!="add|change|move|bind", GOTO="mm_eg91_uart3_end"
 SUBSYSTEMS=="tty", DEVPATH=="/sys/devices/platform/soc/2100000.bus/21ec000.serial"
-LABEL="mm_eg91_uart1_end"
+LABEL="mm_eg91_uart3_end"
 
-# Rule for ModemManager to handle the device on ttymxc1
+# Rule for ModemManager to handle the device on ttymxc2
 ACTION=="add|change|move", SUBSYSTEM=="tty", KERNEL=="ttymxc2", ENV{ID_MM_DEVICE_PROCESS}="1", ENV{ID_MM_TTY_BAUDRATE}="115200", ENV{ID_MM_PORT_TYPE_AT_PPP}="1", ENV{ID_MM_TTY_FLOW_CONTROL}="rts-cts"
