@@ -95,10 +95,20 @@
 	status = "okay";
 };
 
+&fec1 {
+    status = "disabled";
+}
+
 &fec2 {
-    mdio {
-        /delete-node/ ethphy0;
-    };
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		ethphy0: ethernet-phy@0 {
+			reg = <1>;
+			micrel,led-mode = <1>;
+		};
+	};
 };
 
 &uart4 {
