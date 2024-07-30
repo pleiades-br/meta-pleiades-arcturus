@@ -99,18 +99,6 @@
     status = "disabled";
 }
 
-&fec2 {
-	mdio {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		ethphy0: ethernet-phy@0 {
-			reg = <1>;
-			micrel,led-mode = <1>;
-		};
-	};
-};
-
 &uart4 {
     status = "disabled";
 };
