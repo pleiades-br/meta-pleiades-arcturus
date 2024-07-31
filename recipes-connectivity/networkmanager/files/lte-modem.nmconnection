@@ -1,0 +1,17 @@
+[connection]
+id=lte-modem
+uuid=4f91b966-ce9b-4690-835b-342f031fd7f0
+type=gsm
+autoconnect=true
+
+[gsm]
+apn=timbrasil.br
+
+[serial]
+baud=115200
+
+[ipv4]
+method=auto
+
+[ipv6]
+method=ignore

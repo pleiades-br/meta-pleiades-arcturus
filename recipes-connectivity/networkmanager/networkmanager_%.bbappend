@@ -2,6 +2,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRC_URI += " \
     file://wired.nmconnection \
+    file://lte-modem.nmconnection \
     file://NetworkManager.conf \
     "
 
@@ -13,6 +14,7 @@ FILES:${PN} += " \
 do_install:append() {
     install -d ${D}${sysconfdir}/NetworkManager/system-connections
     install -m 0600 ${WORKDIR}/wired.nmconnection ${D}${sysconfdir}/NetworkManager/system-connections
+    install -m 0600 ${WORKDIR}/lte-modem.nmconnection ${D}${sysconfdir}/NetworkManager/system-connections
     install -m 0644 ${WORKDIR}/NetworkManager.conf ${D}${sysconfdir}/NetworkManager
 }
 
