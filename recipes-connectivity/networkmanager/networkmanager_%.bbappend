@@ -12,7 +12,7 @@ FILES:${PN} += " \
 
 do_install:append() {
     install -d ${D}${sysconfdir}/NetworkManager/system-connections
-    install -m 0644 ${WORKDIR}/wired.nmconnection ${D}${sysconfdir}/NetworkManager/system-connections
+    install -m 0600 ${WORKDIR}/wired.nmconnection ${D}${sysconfdir}/NetworkManager/system-connections
     install -m 0644 ${WORKDIR}/NetworkManager.conf ${D}${sysconfdir}/NetworkManager
 }
 

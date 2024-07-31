@@ -2,13 +2,16 @@
 id=wired
 uuid=83470bf3-2346-423c-84c2-6e2ce0e0c74e
 type=ethernet
+autoconnect=true
+autoconnect-priority=999
 interface-name=eth1
 
 [ethernet]
 
 [ipv4]
 method=manual
-address1=192.168.30.1/24,192.168.30.254
+address1=192.168.30.1/24
+gateway=192.168.30.254
 
 [ipv6]
 method=auto
