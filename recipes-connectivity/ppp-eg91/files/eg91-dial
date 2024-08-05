@@ -1,0 +1,7 @@
+/dev/ttymxc2   # Replace with your modem's serial device
+115200       # Baud rate
+connect "/usr/sbin/chat -v -f /etc/ppp/eg91-lte-modem"
+noauth
+defaultroute
+usepeerdns
+persist
