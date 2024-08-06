@@ -15,6 +15,7 @@ S = "${WORKDIR}"
 do_install () {
     install -d ${D}${sysconfdir}/ppp/chatscripts
     install -d ${D}${sysconfdir}/ppp/peers
+    install -d ${D}${sysconfdir}/network
     install -m 0755 eg91-dial ${D}${sysconfdir}/ppp/peers/
     install -m 0755 eg91-lte-modem ${D}${sysconfdir}/ppp/chatscripts/
     install -m 0755 interfaces ${D}${sysconfdir}/network/

@@ -1,6 +1,6 @@
 /dev/ttymxc2  
 115200       
-connect "/usr/sbin/chat -v -f /etc/ppp/eg91-lte-modem"
+connect "/usr/sbin/chat -v -f /etc/ppp/chatscripts/eg91-lte-modem"
 noauth
 defaultroute
 usepeerdns
