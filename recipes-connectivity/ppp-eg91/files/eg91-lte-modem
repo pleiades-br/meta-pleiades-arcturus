@@ -5,9 +5,7 @@ ABORT "NO DIALTONE"
 ABORT "Invalid Login"
 ABORT "Login incorrect"
 TIMEOUT 5
-"" AT
-OK ATH
-OK ATE1
+"" ATE1
 OK 'AT+CGDCONT=1,"IP","timbrasil.br"'
 OK ATD*99#
 CONNECT ""

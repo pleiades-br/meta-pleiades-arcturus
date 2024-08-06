@@ -15,3 +15,12 @@ method=auto
 
 [ipv6]
 method=ignore
+
+[ppp]
+lcp-echo-failure=5
+lcp-echo-interval=30
+refuse-eap=true
+refuse-pap=false
+refuse-chap=false
+refuse-mschap=false
+refuse-mschapv2=false
