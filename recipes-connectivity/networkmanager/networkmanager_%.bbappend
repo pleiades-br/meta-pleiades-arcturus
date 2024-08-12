@@ -11,6 +11,8 @@ FILES:${PN} += " \
     ${sysconfdir}/NetworkManager/NetworkManager.conf \
     "
 
+PACKAGECONFIG:append = " ppp modemmanager"
+
 do_install:append() {
     install -d ${D}${sysconfdir}/NetworkManager/system-connections
     install -m 0600 ${WORKDIR}/wired.nmconnection ${D}${sysconfdir}/NetworkManager/system-connections
