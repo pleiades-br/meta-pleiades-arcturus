@@ -1,20 +1,22 @@
 DESCRIPTION = "Arcturus web configuration page"
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=8e66d58e4d5ff0650d10b76e6c39c852"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-SRC_URI += "https://github.com/pleiades-br/arcturus-web/archive/refs/heads/main.zip;protocol=http"
-SRC_URI[md5sum] = "37e7c1303db943e56e603e9ec699235b"
-SRC_URI[sha256sum] = "e86ee36e8716fe4b33be9bcb272ef9835c5e5ec3b58fd3e2c681334175945e4b"
+SRC_URI = "https://github.com/pleiades-br/arcturus-web/archive/refs/heads/main.zip;protocol=http;"
+SRC_URI[md5sum] = "b9459e3ed9561b2e122b0c5943c5de22"
+SRC_URI[sha256sum] = "eaf5d2b1be17379bcbe92fce64675dbf84029fe0ca028a591ba820c85860251b"
 
 RDEPENDS:${PN} = "lighttpd"
 
-S = "${WORKDIR}/${PN}-${PV}"
+S = "${WORKDIR}"
 
 MY_DESTINATION = "/www/pages"
 
 do_install(){
    install -d ${D}${MY_DESTINATION}
-   cp -r ${S}/* ${D}${MY_DESTINATION}
+   cp -r ${S}/arcturus-web-main/* ${D}${MY_DESTINATION}
 }
 
-FILES_${PN} += "${MY_DESTINATION}/*"
+FILES:${PN} += "/www"
+FILES:${PN} += "/www/pages"
+FILES:${PN} += "${MY_DESTINATION}/*"
