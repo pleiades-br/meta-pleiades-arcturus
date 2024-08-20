@@ -4,7 +4,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 
 SRC_URI = "git://github.com/pleiades-br/arcturus-web-backend.git;protocol=https;branch=main"
-SRCREV = "1a84ff9c005b0bb7eb7df4016fd132c3e5e650fd"
+SRCREV = "ded805f036cbea3870da881eee0dc02b40774daf"
 
 S = "${WORKDIR}/git"
 
