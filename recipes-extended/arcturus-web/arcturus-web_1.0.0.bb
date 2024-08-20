@@ -6,7 +6,7 @@ SRC_URI = "https://github.com/pleiades-br/arcturus-web/archive/refs/heads/main.z
 SRC_URI[md5sum] = "b9459e3ed9561b2e122b0c5943c5de22"
 SRC_URI[sha256sum] = "eaf5d2b1be17379bcbe92fce64675dbf84029fe0ca028a591ba820c85860251b"
 
-RDEPENDS:${PN} = " lighttpd python-flup"
+RDEPENDS:${PN} = " lighttpd"
 
 S = "${WORKDIR}"
 
