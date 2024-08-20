@@ -12,5 +12,5 @@ inherit setuptools3
 
 do_install:append () {
     install -d ${D}${bindir}
-    install -m 0755 arcturusWebBE.py ${D}${bindir}
+    install -m 0755 arcWebBE.py ${D}${bindir}
 }
