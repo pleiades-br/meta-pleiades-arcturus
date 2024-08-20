@@ -4,7 +4,8 @@ SRC_URI += " \
     file://lighttpd.conf \
 "
 
-RDEPENDS:${PN}:append = " 
-    lighttpd-module-rewrite \
-    lighttpd-module-setenv \
+RRECOMMENDS:${PN} = " \
+    lighttpd-module-access \
+    lighttpd-module-accesslog \
+    lighttpd-module-proxy \
 "
