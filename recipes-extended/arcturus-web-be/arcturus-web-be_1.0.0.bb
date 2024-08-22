@@ -7,12 +7,17 @@ SRC_URI = " \
             git://github.com/pleiades-br/arcturus-web-backend.git;protocol=https;branch=main \
             file://arcwebbe \
         "
-SRCREV = "c11e68246af06ec6c4b5c5223c6c279e6fe4b41a"
+SRCREV = "dbe6d6ebe1ab11868f2e093d2a4153e1859e392a"
 
 
 S = "${WORKDIR}/git"
 
-inherit setuptools3
+inherit setuptools3 systemd
+
+SYSTEMD_SERVICE:${PN} = "arcwebbe.service"
+
+INITSCRIPT_NAME = "arcwebbe"
+INITSCRIPT_PARAMS = "defaults 80"
 
 do_install:append () {
     install -d ${D}${bindir} 
@@ -28,3 +33,6 @@ do_install:append () {
 		-e 's,@BASE_BINDIR@,${base_bindir},g' \
 		${D}${systemd_system_unitdir}/arcwebbe.service
 }
+
+FILES:${PN} += " ${systemd_system_unitdir}"
+RDEPENDS:${PN} += " python3-netifaces"
