@@ -11,10 +11,7 @@ mode=ap
 ssid=ARCTURUS_WIFI
 
 [wifi-security]
-group=ccmp;
 key-mgmt=wpa-psk
-pairwise=ccmp;
-proto=rsn;
 psk=arcturus123
 
 [ipv4]
