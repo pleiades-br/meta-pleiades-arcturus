@@ -3,7 +3,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI += " \
     file://wired.nmconnection \
     file://wireless.nmconnection \
-    file://NetworkManager.conf \
+    file://lte-modem.nmconnection \
     file://NetworkManager.conf \    
     "
 
