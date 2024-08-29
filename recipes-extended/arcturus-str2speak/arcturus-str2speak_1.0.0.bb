@@ -3,7 +3,7 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 SRC_URI = "git://github.com/pleiades-br/arcturus-espeak.git;protocol=https;branch=main"
-SRCREV = "3cd351fa0aab44f63c3b5d9fadfad5f782119ee0"
+SRCREV = "bec215cbf011a4348276b52f2cc7dddd85e50735"
 
 S = "${WORKDIR}/git"
 
