@@ -1,0 +1,164 @@
+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/iio/adc/microchip,pac194x.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Microchip PAC194x and PAC195x similar Power Monitors with Accumulator
+
+maintainers:
+  - Marius Cristea <marius.cristea@microchip.com>
+
+properties:
+  compatible:
+    enum:
+      - microchip,pac1954_1
+      - microchip,pac1953_1
+      - microchip,pac1952_1
+      - microchip,pac1951_1
+      - microchip,pac1952_2
+      - microchip,pac1951_2
+      - microchip,pac1944_1
+      - microchip,pac1943_1
+      - microchip,pac1942_1
+      - microchip,pac1941_1
+      - microchip,pac1942_2
+      - microchip,pac1941_2
+
+  reg:
+    maxItems: 1
+
+  "#address-cells":
+    const: 1
+
+  "#size-cells":
+    const: 0
+
+  microchip,samp-rate:
+    $ref: /schemas/types.yaml#/definitions/string
+    description: Sampling rate for all device's channels.
+
+    required:
+       - compatible
+       - reg
+       - microchip,samp-rate
+       - "#address-cells"
+       - "#size-cells"
+
+patternProperties:
+  "^channel([1-4])@[1-4]+$":
+    $ref: "adc.yaml"
+    type: object
+    description: Represents the external channels which are connected to the ADC.
+
+    properties:
+      reg:
+        description: The channel number.
+          It can have up to 4 channels, numbered from 1 to 4.
+        items:
+          - minimum: 1
+            maximum: 4
+
+      microchip,uohms-shunt-res:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        description: |
+          Value in micro Ohms of the shunt resistor connected between
+          the SENSE+ and SENSE- inputs, across which the current is measured. Value
+          is needed to compute the scaling of the measured current.
+
+      microchip,rail-name:
+        $ref: /schemas/types.yaml#/definitions/string
+        description: Name of the monitored power rail.
+
+      microchip,vbus-mode:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        minimum: 0
+        maximum: 2
+        description: |
+          Configure VBUS voltage measurement
+          0: Uni-polar measurement value from 0 to FSR
+          1: Bi-polar measurement value from -FSR to +FSR
+          2: Bi-polar measurement value from -FSR/2 to +FSR/2
+
+      microchip,vsense-mode:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        minimum: 0
+        maximum: 2
+        description: |
+          Configure Vsense voltage measurement
+          0: Uni-polar measurement value from 0 to FSR
+          1: Bi-polar measurement value from -FSR to +FSR
+          2: Bi-polar measurement value from -FSR/2 to +FSR/2
+
+      microchip,accumulation-mode:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        minimum: 0
+        maximum: 2
+        description: |
+          Configuration of the On-Chip Accumulation hardware
+          0:  VPOWER Accumulation (accumulate the product of VBUS and VSENSE)
+          1:  VSENSE Accumulation (Coulomb Counting)
+          2:  VBUS Accumulation (VBUS integration)
+
+    required:
+       - reg
+       - microchip,uohms-shunt-res
+       - microchip,rail-name
+
+    additionalProperties: false
+
+additionalProperties: false
+
+examples:
+  - |
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        pac195x: pac195x@10 {
+            compatible = "microchip,pac1954_1";
+            reg = <0x10>;
+
+            #address-cells = <1>;
+            #size-cells = <0>;
+            microchip,samp-rate = "64";
+
+            channel1@1 {
+                reg = <0x1>;
+                microchip,uohms-shunt-res = <24900000>;
+                microchip,rail-name = "CPU";
+                microchip,vbus-mode = <0>;
+                microchip,vsense-mode = <0>;
+                microchip,accumulation-mode = <0>;
+            };
+
+            channel2@2 {
+                reg = <0x2>;
+                microchip,uohms-shunt-res = <49900000>;
+                microchip,rail-name = "GPU";
+                microchip,vbus-mode = <0>;
+                microchip,vsense-mode = <0>;
+                microchip,accumulation-mode = <0>;
+            };
+
+            channel3@3 {
+                reg = <0x3>;
+                microchip,uohms-shunt-res = <75000000>;
+                microchip,rail-name = "MEM";
+                microchip,vbus-mode = <0>;
+                microchip,vsense-mode = <0>;
+                microchip,accumulation-mode = <0>;
+            };
+
+            channel4@4 {
+                reg = <0x4>;
+                microchip,uohms-shunt-res = <100000000>;
+                microchip,rail-name = "NET";
+                microchip,vbus-mode = <0>;
+                microchip,vsense-mode = <0>;
+                microchip,accumulation-mode = <0>;
+            };
+        };
+    };
+
+...
