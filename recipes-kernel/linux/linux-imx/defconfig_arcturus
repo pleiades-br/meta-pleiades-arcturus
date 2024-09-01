@@ -5663,6 +5663,8 @@ CONFIG_IMX7D_ADC=y
 # CONFIG_TI_TLC4541 is not set
 # CONFIG_TI_TSC2046 is not set
 CONFIG_VF610_ADC=y
+CONFIG_MCP_PAC194X=y
+
 # CONFIG_XILINX_XADC is not set
 # end of Analog to digital converters
 

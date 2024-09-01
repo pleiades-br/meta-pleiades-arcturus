@@ -1,0 +1,44 @@
+From c92e0f8daa5166d228660ccc4fc3992b8b139b7d Mon Sep 17 00:00:00 2001
+From: "Aluisio (ZyZy) Victal" <alvictal@gmail.com>
+Date: Sun, 1 Sep 2024 13:11:11 +0000
+Subject: [PATCH] feat: creating patch
+
+---
+ drivers/iio/adc/Kconfig  | 13 +++++++++++++
+ drivers/iio/adc/Makefile |  1 +
+ 2 files changed, 14 insertions(+)
+
+diff --git a/drivers/iio/adc/Kconfig b/drivers/iio/adc/Kconfig
+index 9d713ce25263..b79e3bfafa4e 100644
+--- a/drivers/iio/adc/Kconfig
++++ b/drivers/iio/adc/Kconfig
+@@ -1298,4 +1298,17 @@ config XILINX_XADC
+ 	  The driver can also be build as a module. If so, the module will be called
+ 	  xilinx-xadc.
+ 
++config CONFIG_MCP_PAC194X
++	tristate "Microchip ADS PAC 194x"
++	depends on I2C
++	select IIO_BUFFER
++	select IIO_TRIGGER
++	select IIO_TRIGGERED_BUFFER
++	help
++	  Say yes here to build support for Microchip ADS PAC 194x SPI
++	  simultaneously sampling sigma-delta analog to digital converter (ADC).
++
++	  To compile this driver as a module, choose M here: the module will be
++	  called pac194x.
++
+ endmenu
+diff --git a/drivers/iio/adc/Makefile b/drivers/iio/adc/Makefile
+index 6eeb7a4749d0..264384cca7b3 100644
+--- a/drivers/iio/adc/Makefile
++++ b/drivers/iio/adc/Makefile
+@@ -117,3 +117,4 @@ obj-$(CONFIG_VIPERBOARD_ADC) += viperboard_adc.o
+ xilinx-xadc-y := xilinx-xadc-core.o xilinx-xadc-events.o
+ obj-$(CONFIG_XILINX_XADC) += xilinx-xadc.o
+ obj-$(CONFIG_SD_ADC_MODULATOR) += sd_adc_modulator.o
++obj-$(CONFIG_MCP_PAC194X) += pac194x.o
+-- 
+2.25.1
+
