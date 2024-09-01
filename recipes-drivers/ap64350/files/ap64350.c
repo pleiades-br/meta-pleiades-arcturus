@@ -105,8 +105,8 @@ static void __exit ap64350_control_exit(void)
     printk(KERN_INFO "AP64350 GPIO Control Module unloaded\n");
 }
 
-module_init(eg91_control_init);
-module_exit(eg91_control_exit);
+module_init(ap64350_control_init);
+module_exit(ap64350_control_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Aluisio Leonello Victal");
