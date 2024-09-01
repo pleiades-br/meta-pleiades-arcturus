@@ -76,7 +76,7 @@ static int __init ap64350_control_init(void)
         return ret;
     }
 
-    ret = gpio_direction_output(AP64350_VBAT, 0);
+    ret = gpio_direction_output(AP64350_VBAT, 1);
     if (ret) {
         printk(KERN_ERR "Unable to set GPIO %d direction - AP64350_vbat_gpio_control\n", AP64350_VBAT);
         gpio_free(AP64350_VBAT);
