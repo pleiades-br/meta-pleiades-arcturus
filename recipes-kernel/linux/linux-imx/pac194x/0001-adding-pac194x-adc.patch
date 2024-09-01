@@ -16,7 +16,7 @@ index 9d713ce25263..b79e3bfafa4e 100644
  	  The driver can also be build as a module. If so, the module will be called
  	  xilinx-xadc.
  
-+config CONFIG_MCP_PAC194X
++config MCP_PAC194X
 +	tristate "Microchip ADS PAC 194x"
 +	depends on I2C
 +	select IIO_BUFFER
