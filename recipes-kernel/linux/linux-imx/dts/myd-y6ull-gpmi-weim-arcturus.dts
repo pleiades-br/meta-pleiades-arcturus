@@ -54,6 +54,45 @@
     #address-cells = <1>;
     #size-cells = <0>;
 
+    pac195x@10 {
+        compatible = "microchip,pac1952_1";
+        reg = <0x10>;
+
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        microchip,samp-rate = "64";
+        status = "okay";
+
+        ch11: channel1@1 {
+            reg = <0x1>;
+            microchip,uohms-shunt-res = <10000000>; /* shunt resistor is 10 ohm */
+            microchip,rail-name = "BATTERY";
+            microchip,vbus-mode = <1>;
+            microchip,vsense-mode = <1>;
+            microchip,accumulation-mode = <0>;
+        };
+
+        ch12: channel2@2 {
+            reg = <0x2>;
+            microchip,uohms-shunt-res = <10000000>; /* shunt resistor is 10 ohm */
+            microchip,rail-name = "SOLAR_PWR";
+            microchip,vbus-mode = <1>;
+            microchip,vsense-mode = <1>;
+            microchip,accumulation-mode = <0>;
+        };
+    };
+    
+};
+
+&i2c2 {
+    #address-cells = <1>;
+    #size-cells = <0>;
+    status = "okay";
+
+    /delete-node/ codec;
+    /delete-node/ ft5x06;
+    /delete-node/ ov2659;
     adc@48 {
         compatible = "ti,ads1015";
         reg = <0x48>;
@@ -82,44 +121,6 @@
             reg = <7>;
             ti,gain = <2>;
             ti,datarate = <4>;
-        };
-    };
-};
-
-&i2c2 {
-    /delete-node/ codec;
-    /delete-node/ ft5x06;
-    /delete-node/ ov2659;
-    #address-cells = <1>;
-    #size-cells = <0>;
-    status = "okay";
-
-    pac195x@10 {
-        compatible = "microchip,pac1952_1";
-        reg = <0x10>;
-
-        #address-cells = <1>;
-        #size-cells = <0>;
-
-        microchip,samp-rate = "64";
-        status = "okay";
-
-        ch11: channel1@1 {
-            reg = <0x1>;
-            microchip,uohms-shunt-res = <10000000>; /* shunt resistor is 10 ohm */
-            microchip,rail-name = "BATTERY";
-            microchip,vbus-mode = <1>;
-            microchip,vsense-mode = <1>;
-            microchip,accumulation-mode = <0>;
-        };
-
-        ch12: channel2@2 {
-            reg = <0x2>;
-            microchip,uohms-shunt-res = <10000000>; /* shunt resistor is 10 ohm */
-            microchip,rail-name = "SOLAR_PWR";
-            microchip,vbus-mode = <1>;
-            microchip,vsense-mode = <1>;
-            microchip,accumulation-mode = <0>;
         };
     };
 };
