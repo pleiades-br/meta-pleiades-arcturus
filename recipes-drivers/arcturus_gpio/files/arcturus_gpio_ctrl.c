@@ -70,7 +70,7 @@ static ssize_t arcturus_control_write(struct file *file, const char *userbuf, si
 {
     char icname[FILE_IC_NAME + 1]  = {0};
     char cmd[FILE_IC_CMD + 1] = {0};
-    char buf[FILE_CMD_SIZE] = {0}.
+    char buf[FILE_CMD_SIZE] = {0};
     int ret;
 
     count = min_t(size_t, count, (sizeof(buf)-1));
@@ -97,7 +97,7 @@ static ssize_t arcturus_control_write(struct file *file, const char *userbuf, si
             */
             if (_eg91_state == IC_OFF) {
                 gpio_set_value(EG91_PWR, 0);
-                _eg91_state == IC_ON;
+                _eg91_state = IC_ON;
             }
             arcturus_reset_ic(EG91_PWR, 1, 0, 550);
         } else {
@@ -152,7 +152,7 @@ static int arcturus_gpio_conf(const int gpio,
 
     if (ret) {
             printk(KERN_ERR "Unable to set GPIO %d to %s direction - %s\n", 
-                    gpio, (direction == INPUT_DIRECTION ? "Input" : "Output", name);)
+                    gpio, (direction == INPUT_DIRECTION ? "Input" : "Output"), name);
             gpio_free(gpio);
     }
 
