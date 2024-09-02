@@ -1,5 +1,5 @@
 #
-# EG91 Chip Initialization driver
+# IC GPIO Initialization driver
 #
 
 # Bitbake class(es)
@@ -9,12 +9,12 @@ inherit module
 DEPENDS = "virtual/kernel"
 
 # Metadata
-SUMMARY = "Sample kernel module"
+SUMMARY = "Arcturus GPIO control for board ICs"
 
 LICENSE = "CLOSED"
 LIC_FILES_CHKSUM = ""
 
-SRC_URI = "file://eg91_ctrl.c \
+SRC_URI = "file://arcturus_gpio_ctrl.c \
         file://Makefile \
 "
 
@@ -25,4 +25,4 @@ EXTRA_OEMAKE:append:task-install = " -C ${STAGING_KERNEL_DIR} M=${S}"
 EXTRA_OEMAKE += "KDIR=${STAGING_KERNEL_DIR}"
 
 # Autoinstall (optionally disable)
-KERNEL_MODULE_AUTOLOAD += "eg91_ctrl"
+KERNEL_MODULE_AUTOLOAD += "arcturus_gpio_ctrl"

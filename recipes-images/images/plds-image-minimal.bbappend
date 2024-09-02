@@ -9,5 +9,5 @@ IMAGE_INSTALL:append = " arcturus-web"
 IMAGE_INSTALL:append = " arcturus-web-be"
 IMAGE_INSTALL:append = " arcturus-str2dtmf"
 IMAGE_INSTALL:append = " arcturus-str2speak"
-IMAGE_INSTALL:append = " kernel-module-ap64350"
+IMAGE_INSTALL:append = " km-arcturus-gpio-ctrl"
 

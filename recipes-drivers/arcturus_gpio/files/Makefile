@@ -1,5 +1,5 @@
 ifneq ($(KERNELRELEASE),)
-    obj-m       := eg91_ctrl.o
+    obj-m       := arcturus_gpio_ctrl.o
 
 else
     PWD := $(shell pwd)
