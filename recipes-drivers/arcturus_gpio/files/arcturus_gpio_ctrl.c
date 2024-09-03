@@ -34,8 +34,8 @@
 #define EG91_WDISABLE   IMX_GPIO_NR(3,23) //PIN 88-107
 #define EG91_PWR        IMX_GPIO_NR(3,24) //PIN 89-108
 #define EG91_RST        IMX_GPIO_NR(3,25) //PIN 90-109
-#define AP64350_VBAT    IMX_GPIO_NR(1,18) //PIN -120
-#define PT100_RST       IMX_GPIO_NR(5,2) //PIN -120
+#define AP64350_VBAT    IMX_GPIO_NR(1,18) //PIN 54
+#define PT100_RST       IMX_GPIO_NR(5,2) //PIN 13
 
 #define DEVICE_NAME "arcturus-gpio-control"
 
@@ -234,6 +234,8 @@ static int arcturus_eg91_init(void)
 
 static int __init arcturus_control_init(void)
 {
+    int ret = RETURN_OK;
+
     if (arcturus_eg91_init()) {
         printk(KERN_INFO "EG91 GPIO Control failed to initialize\n");
     }
@@ -258,6 +260,7 @@ static int __init arcturus_control_init(void)
     }
 
     printk(KERN_INFO "Arcturus GPIO Control module loaded\n");
+    return ret;
 }
 
 static void __exit arcturus_control_exit(void)
