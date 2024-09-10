@@ -178,7 +178,6 @@
     pinctrl-names = "default";
     pinctrl-0 = <&pinctrl_wifi_spi>;
     spi-max-frequency = <4000000>;
-    spi-slave;
     status = "okay";
 };
 
