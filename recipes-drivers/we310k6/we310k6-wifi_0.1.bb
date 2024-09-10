@@ -11,6 +11,7 @@ F = "${WORKDIR}/we310k6/WIFI/firmware"
 do_configure () {
 	sed -i 's/CONFIG_PLATFORM_I386_PC = y/CONFIG_PLATFORM_IMX6 = y/' ${S}/Makefile
 }
+
 do_compile () {
 	cd ${S}/
 	oe_runmake
@@ -32,7 +33,8 @@ do_clean_drv () {
 
 addtask clean_drv before do_clean
 
-EXTRA_OEMAKE += "KDIR=${STAGING_KERNEL_DIR}"
+EXTRA_OEMAKE += " KSRC=${STAGING_KERNEL_BUILDDIR}"
+EXTRA_OEMAKE += " CROSS_COMPILE=${HOST_PREFIX}"
 
 FILES:${PN} += "/lib/*"
 
