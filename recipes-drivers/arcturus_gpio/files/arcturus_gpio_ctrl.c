@@ -186,7 +186,7 @@ static int arcturus_pt100_init(void)
 static int arcturus_ap64350_init(void) 
 {
 
-    if (arcturus_gpio_conf(AP64350_VBAT, "AP64350_vbat_gpio_control", OUTPUT_DIRECTION, 1)) {
+    if (arcturus_gpio_conf(AP64350_VBAT, "AP64350_vbat_gpio_control", OUTPUT_DIRECTION, 0)) {
         goto err;
     }
 
