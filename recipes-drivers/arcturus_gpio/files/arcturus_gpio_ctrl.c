@@ -260,7 +260,7 @@ static int __init arcturus_control_init(void)
     }
 
     printk(KERN_INFO "Arcturus GPIO Control module loaded\n");
-    return ret;
+    return 0;
 }
 
 static void __exit arcturus_control_exit(void)
