@@ -7,6 +7,7 @@ SRC_URI:append:plds-myd-y6ull = " \
     file://pac194x/pac194x.c \
     file://pac194x/microchip,pac194x.yaml \
     file://pac194x/0001-adding-pac194x-adc.patch \
+    file://0001-adding-ads122c04.patch \
     file://defconfig_arcturus"
 
 SRCREV="50912be386017c8d2ca7f0c9c0a32fa7ac84a283"

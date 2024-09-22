@@ -5664,6 +5664,7 @@ CONFIG_TI_ADS1015=m
 # CONFIG_TI_TSC2046 is not set
 CONFIG_VF610_ADC=y
 CONFIG_MCP_PAC194X=m
+CONFIG_TI_ADS122C04=m
 # CONFIG_XILINX_XADC is not set
 # end of Analog to digital converters
 
