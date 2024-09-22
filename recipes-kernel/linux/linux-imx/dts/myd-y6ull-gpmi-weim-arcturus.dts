@@ -84,6 +84,23 @@
             microchip,accumulation-mode = <0>;
         };
     };
+
+    ads122c04x@40 {
+        compatible = "ti,ads122c04";
+        reg = <0x40>;
+
+        #address-cells = <1>;
+        #size-cells = <0>;
+        status = "okay";
+
+        ch0: channel0@0 {
+            reg = <0x0>;
+        }
+
+        ch6: channel6@6 {
+            reg = <0x6>;
+        }
+    }
     
 };
 
