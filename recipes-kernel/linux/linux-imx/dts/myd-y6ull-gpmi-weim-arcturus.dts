@@ -95,12 +95,12 @@
 
         ch0: channel0@0 {
             reg = <0x0>;
-        }
+        };
 
         ch6: channel6@6 {
             reg = <0x6>;
-        }
-    }
+        };
+    };
     
 };
 
