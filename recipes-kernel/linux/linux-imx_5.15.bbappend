@@ -7,7 +7,9 @@ SRC_URI:append:plds-myd-y6ull = " \
     file://pac194x/pac194x.c \
     file://pac194x/microchip,pac194x.yaml \
     file://pac194x/0001-adding-pac194x-adc.patch \
-    file://0001-adding-ads122c04.patch \
+    file://ads122c04/ti-ads122c04.c \
+    file://ads122c04/ti,ads122c04.yaml \
+    file://ads122c04/0001-adding-ads122c04-driver.patch \
     file://defconfig_arcturus"
 
 SRCREV="50912be386017c8d2ca7f0c9c0a32fa7ac84a283"
@@ -23,6 +25,8 @@ copy_arcturus_files() {
     cp -f defconfig_arcturus ${S}/arch/arm/configs/
     cp -f pac194x/pac194x.c ${S}/drivers/iio/adc/
     cp -f pac194x/microchip,pac194x.yaml ${S}/Documentation/devicetree/bindings/iio/adc/
+    cp -f ads122c04/ti-ads122c04.c ${S}/drivers/iio/adc/
+    cp -f ads122c04/ti,ads122c04.yaml ${S}/Documentation/devicetree/bindings/iio/adc/
 }
 
 DEPENDS += " firmware-imx"
