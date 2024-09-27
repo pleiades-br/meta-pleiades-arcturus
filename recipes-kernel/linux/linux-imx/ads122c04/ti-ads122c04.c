@@ -29,19 +29,27 @@
 #define ADS122C04_DRV_NAME "ti-ads122c04"
 
 #define ADS122C04_CHANNELS 12
+#define ADS122C04_VREF_INTERNAL_REF_IN 2048 /* in mv */
+
+#define ADS122C04_DIVISION_FLOAT_SCALE   1000000 /*scale to calculate LSB*/
+#define ADS122C04_LSB_CALC_CONST         0xFFFFFF /* 2^24 */
+#define ADS122C04_DRDY_TRIES             5
+#define ADS122C04_TEMPERATURE_LSB        0.03125
+#define ADS122C04_TEMPERATURE_SCALE      100
+#define ADS122C04_TEMPERATURE_MASK       0x3FFF   
 
 #define ADS122C04_POWERDOWN	    0x02    /* 0000 001X */
-#define ADS122C04_RESET         0x06    /* 0000 011X */
+#define ADS122C04_RESET_CFGS    0x06    /* 0000 011X */
 #define ADS122C04_STARTSYNC	    0x08    /* 0000 100X */
-#define ADS122C04_RDATA	        0x16    /* 0001 XXXX */
-#define ADS122C04_RREG_CGF0_REG	0x32    /* 0010 00XX */
-#define ADS122C04_RREG_CGF1_REG	0x36    /* 0010 01XX */
-#define ADS122C04_RREG_CGF2_REG	0x40    /* 0010 10XX */
-#define ADS122C04_RREG_CGF3_REG	0x44    /* 0010 11XX */
-#define ADS122C04_WREG_CGF0_REG	0x64    /* 0100 00XX */
-#define ADS122C04_WREG_CGF1_REG	0x68    /* 0100 01XX */
-#define ADS122C04_WREG_CGF2_REG	0x72    /* 0100 10XX */
-#define ADS122C04_WREG_CGF3_REG	0x76    /* 0100 11XX */
+#define ADS122C04_RDATA	        0x10    /* 0001 XXXX */
+#define ADS122C04_RREG_CGF0_REG	0x20    /* 0010 00XX */
+#define ADS122C04_RREG_CGF1_REG	0x24    /* 0010 01XX */
+#define ADS122C04_RREG_CGF2_REG	0x28    /* 0010 10XX */
+#define ADS122C04_RREG_CGF3_REG	0x2c    /* 0010 11XX */
+#define ADS122C04_WREG_CGF0_REG	0x40    /* 0100 00XX */
+#define ADS122C04_WREG_CGF1_REG	0x44    /* 0100 01XX */
+#define ADS122C04_WREG_CGF2_REG	0x48    /* 0100 10XX */
+#define ADS122C04_WREG_CGF3_REG	0x4c    /* 0100 11XX */
 
 
 
@@ -99,6 +107,9 @@
 #define ADS122C04_CONV_MODE_SINGLE      0
 #define ADS122C04_CONV_MODE_CONTINUES   1
 
+#define ADS122C04_BURN_OUT_MODE_OFF     0
+#define ADS122C04_BURN_OUT_MODE_ON      1
+
 
 #define ADS122C04_DEFAULT_PGA                   ADS122C04_PGA_ON
 #define ADS122C04_DEFAULT_GAIN                  0 /*1*/        
@@ -126,11 +137,10 @@ enum ads122c04_channels {
     ADS122C04_AIN1_AVSS,
     ADS122C04_AIN2_AVSS,
     ADS122C04_AIN3_AVSS,
-    // Options not supported for this driver
-    /*ADS122C04_VREF_MON, 
-    ADS122C04_AVDD_AVSS, 
-    ADS122C04_AINP_AINN_SHORTED,
-    ADS122C04_RESERVED, */
+    ADS122C04_VREF_MON, 
+    ADS122C04_AVDD_AVSS,
+    ADS122C04_AINP_AINN_SHORTED, 
+    ADS122C04_RESERVED, 
 };
 
 enum ads122c04_vref {
@@ -181,6 +191,7 @@ static const unsigned int ads122c04_idac_current[] = {
 	.address = _addr,					\
 	.channel = _chan,					\
 	.info_mask_separate = BIT(IIO_CHAN_INFO_RAW) |	\
+                BIT(IIO_CHAN_INFO_PROCESSED) |      \
                 BIT(IIO_CHAN_INFO_SCALE) |          \
 				BIT(IIO_CHAN_INFO_SAMP_FREQ),	    \
 	.scan_index = _addr,				\
@@ -190,7 +201,7 @@ static const unsigned int ads122c04_idac_current[] = {
 		.storagebits = 24,				\
 		.endianness = IIO_CPU,			\
 	},							        \
-	.datasheet_name = "AIN"#_chan,		\
+	.datasheet_name = "AIN"#_chan"-AVSS",		\
 }
 
 #define ADS122C04_DIFF_CHAN(_chan, _chan2, _addr) {	\
@@ -201,6 +212,7 @@ static const unsigned int ads122c04_idac_current[] = {
 	.channel = _chan,					\
 	.channel2 = _chan2,					\
 	.info_mask_separate = BIT(IIO_CHAN_INFO_RAW) |	\
+                BIT(IIO_CHAN_INFO_PROCESSED) |      \
     	        BIT(IIO_CHAN_INFO_SCALE) |          \
 				BIT(IIO_CHAN_INFO_SAMP_FREQ),	    \
 	.scan_index = _addr,				\
@@ -260,25 +272,33 @@ static const struct iio_chan_spec ads122c04_channels[] = {
 	ADS122C04_CHAN(3, ADS122C04_AIN3_AVSS),
 };
 
-static int ads122c04_write_value(const struct ads122c04_st *st, const u8 cmd, const u8 *value) 
-{
-    int ret;
 
-    if (value == NULL) {
-        ret = i2c_smbus_write_byte_data(st->client, cmd, *value);
-    } else {
-        ret = i2c_smbus_write_byte(st->client, cmd);
-    }
-    
+static int ads122c04_write_byte(const struct ads122c04_st *st, const u8 cmd) 
+{
+    int ret = i2c_smbus_write_byte(st->client, cmd);
+
     if (ret < 0) {
-        dev_err(&st->client->dev, "Failed to write configuration: %d cmd %d\n", ret, cmd);
+        dev_err(&st->client->dev, "Failed to write configuration: %d cmd 0x%x\n", ret, cmd);
         return ret;
     }
 
     return 0;
 }
 
-static int ads122c04_read_reg_value(const struct ads122c04_st *st, const u8 reg, u8 *value)
+
+static int ads122c04_write_byte_data(const struct ads122c04_st *st, const u8 cmd, const u8 *value) 
+{
+    int ret = i2c_smbus_write_byte_data(st->client, cmd, *value);
+    if (ret < 0) {
+        dev_err(&st->client->dev, "Failed to write data. Ret: %d; cmd: 0x%x; byte: \
+                0x%x;\n", ret, cmd, *value);
+        return ret;
+    }
+
+    return 0;
+}
+
+static int ads122c04_read_reg_value(const struct ads122c04_st *st, const u8 reg)
 {
     if (reg < ADS122C04_RREG_CGF0_REG || reg > ADS122C04_RREG_CGF3_REG) 
         return -EINVAL;
@@ -286,26 +306,85 @@ static int ads122c04_read_reg_value(const struct ads122c04_st *st, const u8 reg,
     return  i2c_smbus_read_byte_data(st->client, reg);
 }
 
+
+static int ads122c04_check_data_drdy(const struct ads122c04_st *st)
+{
+    int ret = 0;
+    int tries = 0;
+    u8 drdy = 0;
+        
+    while(!(drdy & 0x80) && (++tries <= ADS122C04_DRDY_TRIES)) {
+        drdy = ads122c04_read_reg_value(st, ADS122C04_RREG_CGF2_REG);
+
+        /* Wait a bit and check if data is ready to collect*/
+        msleep(100); 
+    }
+
+    if (tries > ADS122C04_DRDY_TRIES) {
+        dev_err(&st->client->dev, "Data is not getting ready to collect\n");
+        return -EBUSY;        
+    }
+
+    return 0; 
+}
+
+
+
 static int ads122c04_read_adc(const struct ads122c04_st *st, int *value)
 {
+    
     int ret;
+    int32_t adc_value = 0;
 
-    u8 result_buf[3]; 
+    u8 data[3] = {0}; 
 
-    msleep(1); 
-
+    ret = ads122c04_check_data_drdy(st);
+    if (ret < 0) 
+        return ret;
+    
     // Read the ADC result from the data registers of ADS122C04
-    ret = i2c_smbus_read_i2c_block_data(st->client, ADS122C04_RDATA, 3, result_buf);
+    ret = i2c_smbus_read_i2c_block_data(st->client, ADS122C04_RDATA, 3, data);
     if (ret < 0) {
         dev_err(&st->client->dev, "Failed to read ADC result: %d\n", ret);
         return ret;
     }
 
-    // The result is in 3 bytes (24 bits), 
-    // Combine the 3 bytes to form the 24-bit ADC result
-    *value = (result_buf[0] << 16) | (result_buf[1] << 8) | result_buf[2];
+    // Combine the 3 bytes into a 24-bit signed integer
+    adc_value = (int32_t)((data[0] << 16) | (data[1] << 8) | data[2]);
+
+    // Check if the result is negative (sign-extend to 32 bits)
+    if (adc_value & 0x800000) {
+        adc_value |= 0xFF000000;  // Sign-extend the 24-bit result to 32-bit
+    }
+   
+    *value = adc_value;
 
     return 0;
+}
+
+
+static void ads122c04_clear_cfg(const struct ads122c04_st *st)
+{
+    ads122c04_write_byte(st, ADS122C04_RESET_CFGS);    
+}
+
+
+static int ads122c04_send_start_command(const struct ads122c04_st *st)
+{
+    return ads122c04_write_byte(st, ADS122C04_STARTSYNC);
+}
+
+
+static int ads122c04_write_vref_monitor(const struct ads122c04_st *st, const int mux)
+{
+    u8 cfg = 0;
+
+    if ((mux < ADS122C04_VREF_MON)|| (mux > ADS122C04_AVDD_AVSS))
+        return -EINVAL;
+
+    cfg = mux << ADS122C04_CFG0_MUX_SHIFT;
+
+    return ads122c04_write_byte_data(st, ADS122C04_WREG_CGF0_REG, &cfg);
 }
 
 
@@ -317,9 +396,10 @@ static int ads122c04_write_cfg0(const struct ads122c04_st *st, const int chan)
         st->channel_data[chan].gain << ADS122C04_CFG0_GAIN_SHIFT | 
         st->channel_data[chan].pga_enabled;
 
-    ads122c04_write_value(st, ADS122C04_WREG_CGF0_REG, &cfg);
-    return 0;
+    
+    return ads122c04_write_byte_data(st, ADS122C04_WREG_CGF0_REG, &cfg);
 }
+
 
 static int ads122c04_write_cfg1(const struct ads122c04_st *st, const int chan)
 {
@@ -331,8 +411,7 @@ static int ads122c04_write_cfg1(const struct ads122c04_st *st, const int chan)
         st->channel_data[chan].vref << ADS122C04_CFG1_VREF_SHIFT |
         st->channel_data[chan].temperature_mode;
 
-    ads122c04_write_value(st, ADS122C04_WREG_CGF1_REG, &cfg);
-    return 0;
+    return ads122c04_write_byte_data(st, ADS122C04_WREG_CGF1_REG, &cfg);
 }
 
 static int ads122c04_write_cfg2(const struct ads122c04_st *st)
@@ -344,8 +423,7 @@ static int ads122c04_write_cfg2(const struct ads122c04_st *st)
         st->burnout << ADS122C04_CFG2_BCS_SHIFT |
         st->idac;
 
-    ads122c04_write_value(st, ADS122C04_WREG_CGF2_REG, &cfg);
-    return 0;
+    return ads122c04_write_byte_data(st, ADS122C04_WREG_CGF2_REG, &cfg);
 }
 
 
@@ -356,12 +434,12 @@ static int ads122c04_write_cfg3(const struct ads122c04_st *st)
     cfg = st->idac1_mux << ADS122C04_CFG3_I1MUX_SHIFT | 
         st->idac2_mux << ADS122C04_CFG3_I2MUX_SHIFT;
 
-    ads122c04_write_value(st, ADS122C04_WREG_CGF3_REG, &cfg);
-    return 0;
+    return ads122c04_write_byte_data(st, ADS122C04_WREG_CGF3_REG, &cfg);
 }
 
 
-static int ads122c04_get_adc_result(const struct ads122c04_st *st, const int chan, int *val)
+
+static int ads122c04_get_chan_adc_result(const struct ads122c04_st *st, const int chan, int *val)
 {
     int ret;
 
@@ -376,16 +454,23 @@ static int ads122c04_get_adc_result(const struct ads122c04_st *st, const int cha
     if (ret)
         return ret;
 
+    ret = ads122c04_write_cfg2(st);
+    if (ret)
+        return ret;
+
+    ret = ads122c04_write_cfg3(st);
+    if (ret)
+        return ret;
+
     /* Start/Sync depends of the convertion mode and the
        Datasheet recomends send de STARTSYNC cmd when the cfg1 is modified */
-    ret = ads122c04_write_value(st, ADS122C04_STARTSYNC, NULL);
+    ret = ads122c04_send_start_command(st);
 	if (ret) {
 		return ret;
     }
 
 	return ads122c04_read_adc(st, val);
 }
-
 
 
 static int ads122c04_set_data_rate(struct ads122c04_st *st, int chan, int rate)
@@ -395,12 +480,12 @@ static int ads122c04_set_data_rate(struct ads122c04_st *st, int chan, int rate)
 	for (i = 0; i < ARRAY_SIZE(ads122c04_data_rate); i++) {
         if (st->channel_data[chan].turbo_mode) {
 		    if (ads122c04_data_rate[i] == rate) {
-			    st->channel_data[chan].data_rate = rate;
+			    st->channel_data[chan].data_rate = i;
 			    return 0;
 		    }
         } else {
             if (ads122c04_data_rate_turbo[i] == rate) {
-			    st->channel_data[chan].data_rate = rate;
+			    st->channel_data[chan].data_rate = i;
 			    return 0;
 		    }
         }
@@ -416,7 +501,7 @@ static int ads122c04_set_gain(struct ads122c04_st *st, int chan, int gain)
 
 	for (i = 0; i < ARRAY_SIZE(ads122c04_gain_cfg); i++) {
 		if (ads122c04_gain_cfg[i] == gain) {
-			st->channel_data[chan].data_rate = gain;
+			st->channel_data[chan].data_rate = i;
 			return 0;
 		}
 	}
@@ -424,6 +509,68 @@ static int ads122c04_set_gain(struct ads122c04_st *st, int chan, int gain)
 	return -EINVAL;
 }
 
+static int ads122c04_convert_adc_value_to_millivolts(int32_t adc_value, uint32_t vref_mv, uint8_t gain) {
+    // Calculate the lsb first
+    int lsb = ((2 * vref_mv * ADS122C04_DIVISION_FLOAT_SCALE)/gain)/ADS122C04_LSB_CALC_CONST;
+    int mvolt = (adc_value * lsb) / ADS122C04_DIVISION_FLOAT_SCALE;
+
+    //printk(KERN_CRIT "[ads122 - ads122c04_convert_to_millivolts] %d %d %d\n", mvolt, adc_value,  lsb);
+    return (int) mvolt;
+}
+
+static int ads122c04_get_vref_monitor(struct ads122c04_st *st, int especial_mux)
+{
+    int ret;
+    int adc_result = 0;
+
+    ads122c04_clear_cfg(st);
+
+    ret = ads122c04_write_vref_monitor(st, especial_mux);
+    if(ret)
+        return ret;
+
+    ret = ads122c04_send_start_command(st);
+	if (ret) {
+		return ret;
+    }
+
+    ret = ads122c04_read_adc(st, &adc_result);
+    if(ret)
+        return ret;
+
+    return ads122c04_convert_adc_value_to_millivolts(adc_result, ADS122C04_VREF_INTERNAL_REF_IN, 1) * 4;
+}
+
+static int ads122c04_process_raw(struct ads122c04_st *st, int chan, int *val)
+{
+    int vref_mv = 0;
+    int temp = 0;
+    
+
+    if (st->channel_data[chan].temperature_mode == ADS122C04_TEMPERATURE_MODE_OFF) {
+        if (st->channel_data[chan].vref == ADS122C04_VREF_INTERNAL) {
+            vref_mv = ADS122C04_VREF_INTERNAL_REF_IN
+        } else if (st->channel_data[chan].vref == ADS122C04_VREF_EXTERNAL) {
+            vref_mv = ads122c04_get_vref_monitor(st, ADS122C04_VREF_MON);
+        } else { 
+            vref_mv = ads122c04_get_vref_monitor(st, ADS122C04_AVDD_AVSS);
+        }
+        return ads122c04_convert_adc_value_to_millivolts(*val, vref_mv, ads122c04_gain_cfg[st->channel_data[chan].gain]);
+    } else {
+        temp = *val >> 10;
+        if (temp & 0x2000) {
+            temp = temp - 1;
+            temp = (~temp) & ADS122C04_TEMPERATURE_MASK;
+            temp = temp * -ADS122C04_TEMPERATURE_LSB * ADS122C04_TEMPERATURE_SCALE
+        } else {
+            temp = temp * ADS122C04_TEMPERATURE_LSB * ADS122C04_TEMPERATURE_SCALE
+        }
+
+        return (int) temp;
+    }
+
+    return 0;
+}
 
 
 static int ads122c04_read_raw(struct iio_dev *indio_dev,
@@ -431,34 +578,43 @@ static int ads122c04_read_raw(struct iio_dev *indio_dev,
 			    int *val2, long mask)
 {
 	int ret;
+    int mvolt = 0;
 	struct ads122c04_st *st = iio_priv(indio_dev);
 
 	mutex_lock(&st->lock);
 	switch (mask) {
+    case IIO_CHAN_INFO_PROCESSED:
 	case IIO_CHAN_INFO_RAW:
 		ret = iio_device_claim_direct_mode(indio_dev);
 		if (ret)
 			break;
 
-		ret = ads122c04_get_adc_result(st, chan->address, val);
+        if (st->channel_data[chan->address].enabled == CHANNEL_DISABLED) {
+            *val = 0;
+            goto release_direct;
+        }
+
+		ret = ads122c04_get_chan_adc_result(st, chan->address, val);
 		if (ret < 0) {
 			goto release_direct;
 		}
 
-		*val = sign_extend32(*val >> chan->scan_type.shift,
-				     chan->scan_type.realbits - 1);
+        if (mask == IIO_CHAN_INFO_PROCESSED) {
+            mvolt = ads122c04_process_raw(st, chan->address, val);
+            *val = mvolt;
+        }
 
 		ret = IIO_VAL_INT;
 
 release_direct:
 		iio_device_release_direct_mode(indio_dev);
-		break;
+        break;
 	case IIO_CHAN_INFO_SCALE:
-		*val = st->channel_data[chan->address].gain;
+		*val = ads122c04_gain_cfg[st->channel_data[chan->address].gain];
 		ret = IIO_VAL_INT;
 		break;
 	case IIO_CHAN_INFO_SAMP_FREQ:
-		*val = st->channel_data[chan->address].data_rate;
+		*val = ads122c04_data_rate[st->channel_data[chan->address].data_rate];
 		ret = IIO_VAL_INT;
 		break;
 	default:
@@ -547,7 +703,7 @@ static int ads122c04_client_get_channels_config(struct i2c_client *client)
 
         data->channel_data[channel].enabled = CHANNEL_ENABLED;
 
-        if (!fwnode_property_present(node, "ti,pga-disable"))
+        if (fwnode_property_present(node, "ti,pga-disable"))
             data->channel_data[channel].pga_enabled = ADS122C04_PGA_OFF;
 
 		if (!fwnode_property_read_u32(node, "ti,gain", &pval)) {
@@ -586,14 +742,14 @@ static int ads122c04_client_get_channels_config(struct i2c_client *client)
             data->channel_data[channel].vref = pval;
 		}
 
-        if (!fwnode_property_present(node, "ti,turbo-mode-enabled"))
+        if (fwnode_property_present(node, "ti,turbo-mode-enabled"))
             data->channel_data[channel].turbo_mode = ADS122C04_TURBO_MODE_ON;
 
-        if (!fwnode_property_present(node, "ti,temperature-mode-enabled"))
-            data->channel_data[channel].turbo_mode = ADS122C04_TEMPERATURE_MODE_ON;
+        if (fwnode_property_present(node, "ti,temperature-mode-enabled"))
+            data->channel_data[channel].temperature_mode = ADS122C04_TEMPERATURE_MODE_ON;
 
-        if (!fwnode_property_present(node, "ti,continues-mode"))
-            data->channel_data[channel].turbo_mode = ADS122C04_CONV_MODE_CONTINUES;
+        if (fwnode_property_present(node, "ti,continues-mode"))
+            data->channel_data[channel].conv_mode = ADS122C04_CONV_MODE_CONTINUES;
 
 		i++;
 	}
@@ -617,12 +773,50 @@ static void ads122c04_get_channels_config(struct i2c_client *client)
             .vref = ADS122C04_DEFAULT_MAIN_VREF_REFERENCE,
     };
     int i = 0;
+    int pval = 0;
 
     
 	/* Default configuration */
 	for(i = 0; i < ADS122C04_CHANNELS; ++i) {
 		data->channel_data[i] = chan_default;
 	}
+
+
+    if (fwnode_property_present(client->dev.of_node, "ti,turbo-mode-enabled"))
+        data->burnout = ADS122C04_BURN_OUT_MODE_ON;
+
+
+	if (!fwnode_property_read_u32(client->dev.of_node, "ti,idac-cfg", &pval)) {		
+	    if (pval > 7) {
+		    dev_err(dev, "invalid data_rate on %pfw\n", client->dev.of_node);
+		    fwnode_handle_put(node);
+		    return -EINVAL;
+	    }
+        data->idac = pval;
+    }
+
+    if (data->idac != 0) {
+        pval = 0;
+	    if (!fwnode_property_read_u32(client->dev.of_node, "ti,idac1-route", &pval)) {		
+	        if (pval > 6) {
+		        dev_err(dev, "invalid data_rate on %pfw\n", client->dev.of_node);
+		        fwnode_handle_put(node);
+		        return -EINVAL;
+	        }
+            data->idac1_mux = pval;
+	    }
+
+        pval = 0;
+	    if (!fwnode_property_read_u32(client->dev.of_node, "ti,idac2-route", &pval)) {		
+	        if (pval > 6) {
+		        dev_err(dev, "invalid data_rate on %pfw\n", client->dev.of_node);
+		        fwnode_handle_put(node);
+		        return -EINVAL;
+	        }
+            data->idac2_mux = pval;
+	    }
+    }
+
 
 	if (!ads122c04_client_get_channels_config(client))
 		return;
@@ -712,4 +906,3 @@ module_i2c_driver(ads122c04_driver);
 MODULE_AUTHOR("Aluisio Leonello Victal <alvictal@gmail.com>");
 MODULE_DESCRIPTION("Texas Instruments ADS122C04 ADC driver");
 MODULE_LICENSE("GPL v2");
-
