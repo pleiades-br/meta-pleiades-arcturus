@@ -309,7 +309,6 @@ static int ads122c04_read_reg_value(const struct ads122c04_st *st, const u8 reg)
 
 static int ads122c04_check_data_drdy(const struct ads122c04_st *st)
 {
-    int ret = 0;
     int tries = 0;
     u8 drdy = 0;
         
@@ -545,11 +544,10 @@ static int ads122c04_process_raw(struct ads122c04_st *st, int chan, int *val)
 {
     int vref_mv = 0;
     int temp = 0;
-    
 
     if (st->channel_data[chan].temperature_mode == ADS122C04_TEMPERATURE_MODE_OFF) {
         if (st->channel_data[chan].vref == ADS122C04_VREF_INTERNAL) {
-            vref_mv = ADS122C04_VREF_INTERNAL_REF_IN
+            vref_mv = ADS122C04_VREF_INTERNAL_REF_IN;
         } else if (st->channel_data[chan].vref == ADS122C04_VREF_EXTERNAL) {
             vref_mv = ads122c04_get_vref_monitor(st, ADS122C04_VREF_MON);
         } else { 
@@ -561,9 +559,9 @@ static int ads122c04_process_raw(struct ads122c04_st *st, int chan, int *val)
         if (temp & 0x2000) {
             temp = temp - 1;
             temp = (~temp) & ADS122C04_TEMPERATURE_MASK;
-            temp = temp * -ADS122C04_TEMPERATURE_LSB * ADS122C04_TEMPERATURE_SCALE
+            temp = temp * -ADS122C04_TEMPERATURE_LSB * ADS122C04_TEMPERATURE_SCALE;
         } else {
-            temp = temp * ADS122C04_TEMPERATURE_LSB * ADS122C04_TEMPERATURE_SCALE
+            temp = temp * ADS122C04_TEMPERATURE_LSB * ADS122C04_TEMPERATURE_SCALE;
         }
 
         return (int) temp;
@@ -762,6 +760,7 @@ static void ads122c04_get_channels_config(struct i2c_client *client)
 {
 	struct iio_dev *indio_dev = i2c_get_clientdata(client);
 	struct ads122c04_st *data = iio_priv(indio_dev);
+    struct device *dev = &client->dev;
     struct ads122c04_channel_data chan_default = {
             .enabled = CHANNEL_DISABLED,
             .pga_enabled = ADS122C04_DEFAULT_PGA,
@@ -782,36 +781,33 @@ static void ads122c04_get_channels_config(struct i2c_client *client)
 	}
 
 
-    if (fwnode_property_present(client->dev.of_node, "ti,turbo-mode-enabled"))
+    if (of_property_read_bool(client->dev.of_node, "ti,burn-out-mode-enabled")) { 
         data->burnout = ADS122C04_BURN_OUT_MODE_ON;
+    }
 
-
-	if (!fwnode_property_read_u32(client->dev.of_node, "ti,idac-cfg", &pval)) {		
+	if (!of_property_read_u32(client->dev.of_node, "ti,idac-cfg", &pval)) {		
 	    if (pval > 7) {
 		    dev_err(dev, "invalid data_rate on %pfw\n", client->dev.of_node);
-		    fwnode_handle_put(node);
-		    return -EINVAL;
+		    return;
 	    }
         data->idac = pval;
     }
 
     if (data->idac != 0) {
         pval = 0;
-	    if (!fwnode_property_read_u32(client->dev.of_node, "ti,idac1-route", &pval)) {		
+	    if (!of_property_read_u32(client->dev.of_node, "ti,idac1-route", &pval)) {		
 	        if (pval > 6) {
 		        dev_err(dev, "invalid data_rate on %pfw\n", client->dev.of_node);
-		        fwnode_handle_put(node);
-		        return -EINVAL;
+		        return;
 	        }
             data->idac1_mux = pval;
 	    }
 
         pval = 0;
-	    if (!fwnode_property_read_u32(client->dev.of_node, "ti,idac2-route", &pval)) {		
+	    if (!of_property_read_u32(client->dev.of_node, "ti,idac2-route", &pval)) {		
 	        if (pval > 6) {
 		        dev_err(dev, "invalid data_rate on %pfw\n", client->dev.of_node);
-		        fwnode_handle_put(node);
-		        return -EINVAL;
+		        return;
 	        }
             data->idac2_mux = pval;
 	    }
