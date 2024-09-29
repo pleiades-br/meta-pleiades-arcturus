@@ -10,7 +10,6 @@ SRC_URI:append:plds-myd-y6ull = " \
     file://ads122c04/ti-ads122c04.c \
     file://ads122c04/ti,ads122c04.yaml \
     file://ads122c04/0001-adding-ads122c04-driver.patch \
-    file://0001-changing-arm-for-hard-float.patch \
     file://defconfig_arcturus"
 
 SRCREV="50912be386017c8d2ca7f0c9c0a32fa7ac84a283"

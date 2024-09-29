@@ -34,8 +34,7 @@
 #define ADS122C04_DIVISION_FLOAT_SCALE   1000000 /*scale to calculate LSB*/
 #define ADS122C04_LSB_CALC_CONST         0xFFFFFF /* 2^24 */
 #define ADS122C04_DRDY_TRIES             5
-#define ADS122C04_TEMPERATURE_LSB        0.03125
-#define ADS122C04_TEMPERATURE_SCALE      100
+#define ADS122C04_TEMPERATURE_LSB        3125 /* 0.03125 * 100000 scale to avoid float division */
 #define ADS122C04_TEMPERATURE_MASK       0x3FFF   
 
 #define ADS122C04_POWERDOWN	    0x02    /* 0000 001X */
@@ -559,9 +558,9 @@ static int ads122c04_process_raw(struct ads122c04_st *st, int chan, int *val)
         if (temp & 0x2000) {
             temp = temp - 1;
             temp = (~temp) & ADS122C04_TEMPERATURE_MASK;
-            temp = temp * -ADS122C04_TEMPERATURE_LSB * ADS122C04_TEMPERATURE_SCALE;
+            temp = temp * -ADS122C04_TEMPERATURE_LSB;
         } else {
-            temp = temp * ADS122C04_TEMPERATURE_LSB * ADS122C04_TEMPERATURE_SCALE;
+            temp = temp * ADS122C04_TEMPERATURE_LSB;
         }
 
         return (int) temp;
