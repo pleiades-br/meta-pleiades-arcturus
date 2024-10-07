@@ -118,14 +118,8 @@
         #address-cells = <1>;
         #size-cells = <0>;
 
-        channel@4 {
-            reg = <4>;
-            ti,gain = <2>;
-            ti,datarate = <4>;
-        };
-
-        channel@5 {
-            reg = <5>;
+        channel@0 {
+            reg = <0>;
             ti,gain = <2>;
             ti,datarate = <4>;
         };
@@ -209,6 +203,8 @@
                 MX6UL_PAD_NAND_CE1_B__GPIO4_IO14    0x17059 /* LTE Reset */
                 MX6UL_PAD_LCD_DATA17__GPIO3_IO22    0x000010B0
                 MX6UL_PAD_SNVS_TAMPER2__GPIO5_IO02  0x1b0b0 /* PT100 Reset - SODDIM 13 */
+                MX6UL_PAD_SNVS_TAMPER6__GPIO5_IO06  0x1b0b0 /* PTA1 */
+                MX6UL_PAD_SNVS_TAMPER4__GPIO5_IO04  0x1b0b0 /* PTA2 */
             >;
         };
 
