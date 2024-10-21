@@ -35,6 +35,15 @@
                 };
 
         };
+    reg_sd1_vmmc: regulator-sd1-vmmc {
+		compatible = "regulator-fixed";
+		regulator-name = "VSD_3V3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio4 26 GPIO_ACTIVE_HIGH>;
+		off-on-delay-us = <20000>;
+		enable-active-high;
+	};
     /delete-node/ sound;
 };
 
@@ -282,6 +291,7 @@
 };
 
 &usdhc1 {
+    vmmc-supply = <&reg_sd1_vmmc>;
 	status = "okay";
 };
 
