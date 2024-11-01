@@ -106,12 +106,14 @@
         #size-cells = <0>;
         status = "okay";
 
-        ch0: channel0@0 {
-            reg = <0x0>;
-        };
+        ti,idac-cfg = 5;
+        ti,idac1-route = 3;
+        ti,idac2-route = 4;
 
-        ch6: channel6@6 {
-            reg = <0x6>;
+        ch0: channel3@3 {
+            reg = <0x3>;
+            ti,gain = 3;
+            ti,datarate = 0;
         };
     };
     
