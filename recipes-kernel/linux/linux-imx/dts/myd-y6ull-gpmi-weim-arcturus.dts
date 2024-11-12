@@ -79,7 +79,7 @@
         microchip,samp-rate = "64";
         status = "okay";
 
-        ch11: channel1@1 {
+        ch1: channel1@1 {
             reg = <0x1>;
             microchip,uohms-shunt-res = <10000000>; /* shunt resistor is 10 ohm */
             microchip,rail-name = "BATTERY";
@@ -88,8 +88,8 @@
             microchip,accumulation-mode = <0>;
         };
 
-        ch12: channel2@2 {
-            reg = <0x2>;
+        ch2: channel4@4 {
+            reg = <0x4>;
             microchip,uohms-shunt-res = <10000000>; /* shunt resistor is 10 ohm */
             microchip,rail-name = "SOLAR_PWR";
             microchip,vbus-mode = <1>;
@@ -114,6 +114,7 @@
             reg = <0x3>;
             ti,gain = <3>;
             ti,datarate = <0>;
+            ti,vref = <1>;
         };
     };
     
@@ -135,20 +136,20 @@
 
         channel@0 {
             reg = <0>;
-            ti,gain = <2>;
-            ti,datarate = <4>;
+            ti,gain = <0>;
+            ti,datarate = <6>;
         };
 
         channel@6 {
             reg = <6>;
-            ti,gain = <2>;
-            ti,datarate = <4>;        
+            ti,gain = <0>;
+            ti,datarate = <6>;        
         };
 
         channel@7 {
             reg = <7>;
-            ti,gain = <2>;
-            ti,datarate = <4>;
+            ti,gain = <0>;
+            ti,datarate = <6>;
         };
     };
 };

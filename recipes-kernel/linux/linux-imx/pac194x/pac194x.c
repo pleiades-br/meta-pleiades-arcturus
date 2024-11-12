@@ -560,7 +560,7 @@ static const struct pac194x5x_features pac194x5x_chip_config[] = {
 		.prod_id = PAC_PRODUCT_ID_1953_1,
 	},
 	[pac1952_1] = {
-		.phys_channels = PAC194X5X_MAX_NUM_CHANNELS - 2,
+		.phys_channels = PAC194X5X_MAX_NUM_CHANNELS,
 		.prod_id = PAC_PRODUCT_ID_1952_1,
 	},
 	[pac1951_1] = {
