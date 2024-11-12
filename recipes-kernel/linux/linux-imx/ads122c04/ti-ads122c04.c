@@ -320,6 +320,7 @@ static int ads122c04_check_data_drdy(const struct ads122c04_st *st)
 
     if (tries > ADS122C04_DRDY_TRIES) {
         dev_err(&st->client->dev, "Data is not getting ready to collect\n");
+        printk(KERN_ERR "Data is not getting ready to collect");
         return -EBUSY;        
     }
 
@@ -445,25 +446,34 @@ static int ads122c04_get_chan_adc_result(const struct ads122c04_st *st, const in
 		return -EINVAL;
 
     ret = ads122c04_write_cfg0(st, chan);
-    if (ret)
+    if (ret) {
+        printk(KERN_ERR "Failed to write register 0. Err %d", ret);
         return ret;
+    }
 
     ret = ads122c04_write_cfg1(st, chan);
-    if (ret)
+    if (ret) {
+        printk(KERN_ERR "Failed to write register 1. Err %d", ret);
         return ret;
+    }
 
     ret = ads122c04_write_cfg2(st);
-    if (ret)
+    if (ret) {
+        printk(KERN_ERR "Failed to write register 2. Err %d", ret);
         return ret;
+    }
 
     ret = ads122c04_write_cfg3(st);
-    if (ret)
+    if (ret) {
+        printk(KERN_ERR "Failed to write register 3. Err %d", ret);
         return ret;
+    }
 
     /* Start/Sync depends of the convertion mode and the
        Datasheet recomends send de STARTSYNC cmd when the cfg1 is modified */
     ret = ads122c04_send_start_command(st);
 	if (ret) {
+        printk(KERN_ERR "Failed to send a start command on channel %d. Err %d", chan ,ret);
 		return ret;
     }
 
@@ -524,17 +534,22 @@ static int ads122c04_get_vref_monitor(struct ads122c04_st *st, int especial_mux)
     ads122c04_clear_cfg(st);
 
     ret = ads122c04_write_vref_monitor(st, especial_mux);
-    if(ret)
+    if(ret) {
+        printk(KERN_CRIT "Failed to write vref monitor. Err %d", ret);
         return ret;
+    }
 
     ret = ads122c04_send_start_command(st);
 	if (ret) {
+        printk(KERN_CRIT "Failed to send a start command on vref monitor. Err %d", ret);
 		return ret;
     }
 
     ret = ads122c04_read_adc(st, &adc_result);
-    if(ret)
+    if(ret) {
+        printk(KERN_CRIT "Failed to read adc on vref monitor. Err %d", ret);
         return ret;
+    }
 
     return ads122c04_convert_adc_value_to_millivolts(adc_result, ADS122C04_VREF_INTERNAL_REF_IN, 1) * 4;
 }
@@ -547,10 +562,13 @@ static int ads122c04_process_raw(struct ads122c04_st *st, int chan, int *val)
     if (st->channel_data[chan].temperature_mode == ADS122C04_TEMPERATURE_MODE_OFF) {
         if (st->channel_data[chan].vref == ADS122C04_VREF_INTERNAL) {
             vref_mv = ADS122C04_VREF_INTERNAL_REF_IN;
+            printk(KERN_CRIT "ads122 INTERNAL %d", vref_mv);
         } else if (st->channel_data[chan].vref == ADS122C04_VREF_EXTERNAL) {
             vref_mv = ads122c04_get_vref_monitor(st, ADS122C04_VREF_MON);
+            printk(KERN_CRIT "ads122 EXTERNAL %d", vref_mv);
         } else { 
             vref_mv = ads122c04_get_vref_monitor(st, ADS122C04_AVDD_AVSS);
+            printk(KERN_CRIT "ads122 AVDD %d", vref_mv);
         }
         return ads122c04_convert_adc_value_to_millivolts(*val, vref_mv, ads122c04_gain_cfg[st->channel_data[chan].gain]);
     } else {
