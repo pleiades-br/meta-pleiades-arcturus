@@ -31,7 +31,7 @@
 #define ADS122C04_CHANNELS 12
 #define ADS122C04_VREF_INTERNAL_REF_IN 2048 /* in mv */
 
-#define ADS122C04_DIVISION_FLOAT_SCALE   1000000 /*scale to calculate LSB*/
+#define ADS122C04_DIVISION_FLOAT_SCALE   1000000LL /*scale to calculate LSB*/
 #define ADS122C04_LSB_CALC_CONST         0xFFFFFF /* 2^24 */
 #define ADS122C04_DRDY_TRIES             5
 #define ADS122C04_TEMPERATURE_LSB        3125 /* 0.03125 * 100000 scale to avoid float division */
@@ -192,7 +192,8 @@ static const unsigned int ads122c04_idac_current[] = {
 	.info_mask_separate = BIT(IIO_CHAN_INFO_RAW) |	\
                 BIT(IIO_CHAN_INFO_PROCESSED) |      \
                 BIT(IIO_CHAN_INFO_SCALE) |          \
-				BIT(IIO_CHAN_INFO_SAMP_FREQ),	    \
+				BIT(IIO_CHAN_INFO_SAMP_FREQ) |	    \
+                BIT(IIO_CHAN_INFO_HARDWAREGAIN),    \
 	.scan_index = _addr,				\
 	.scan_type = {						\
 		.sign = 's',					\
@@ -213,7 +214,8 @@ static const unsigned int ads122c04_idac_current[] = {
 	.info_mask_separate = BIT(IIO_CHAN_INFO_RAW) |	\
                 BIT(IIO_CHAN_INFO_PROCESSED) |      \
     	        BIT(IIO_CHAN_INFO_SCALE) |          \
-				BIT(IIO_CHAN_INFO_SAMP_FREQ),	    \
+				BIT(IIO_CHAN_INFO_SAMP_FREQ) |	    \
+                BIT(IIO_CHAN_INFO_HARDWAREGAIN),    \
 	.scan_index = _addr,				\
 	.scan_type = {						\
 		.sign = 's',					\
@@ -517,16 +519,26 @@ static int ads122c04_set_gain(struct ads122c04_st *st, int chan, int gain)
 	return -EINVAL;
 }
 
-static int ads122c04_convert_adc_value_to_millivolts(int32_t adc_value, uint32_t vref_mv, uint8_t gain) {
-    // Calculate the lsb first
-    int lsb = ((2 * vref_mv * ADS122C04_DIVISION_FLOAT_SCALE)/gain)/ADS122C04_LSB_CALC_CONST;
-    int mvolt = (adc_value * lsb) / ADS122C04_DIVISION_FLOAT_SCALE;
+static int ads122c04_calculate_lsb(uint32_t vref_mv, uint8_t gain)
+{
+    uint64_t tmp = div_s64((2 * vref_mv * ADS122C04_DIVISION_FLOAT_SCALE), gain);
+    int lsb = div_u64(tmp ,ADS122C04_LSB_CALC_CONST); 
+    printk(KERN_CRIT "ads122c04_calculate_lsb %d %d %d %d", lsb, tmp, vref_mv, gain);
 
-    //printk(KERN_CRIT "[ads122 - ads122c04_convert_to_millivolts] %d %d %d\n", mvolt, adc_value,  lsb);
-    return (int) mvolt;
+    return lsb;
 }
 
-static int ads122c04_get_vref_monitor(struct ads122c04_st *st, int especial_mux)
+static int ads122c04_convert_adc_value_to_millivolts(int32_t adc_value, uint32_t vref_mv, uint8_t gain) {
+    // Calculate the lsb first
+
+    unsigned int lsb = ads122c04_calculate_lsb(vref_mv, gain);
+    int mvolt = div_s64((adc_value * lsb), ADS122C04_DIVISION_FLOAT_SCALE);
+
+    //printk(KERN_CRIT "[ads122 - ads122c04_convert_to_millivolts] %d %d %d\n", mvolt, adc_value,  lsb);
+    return mvolt;
+}
+
+static int ads122c04_get_especial_vref(struct ads122c04_st *st, int especial_mux)
 {
     int ret;
     int adc_result = 0;
@@ -551,25 +563,36 @@ static int ads122c04_get_vref_monitor(struct ads122c04_st *st, int especial_mux)
         return ret;
     }
 
-    return ads122c04_convert_adc_value_to_millivolts(adc_result, ADS122C04_VREF_INTERNAL_REF_IN, 1) * 4;
+    printk(KERN_CRIT "ads122 ads122c04_get_vref_monitor adc_result %d", adc_result);
+
+    return adc_result;
 }
 
-static int ads122c04_process_raw(struct ads122c04_st *st, int chan, int *val)
+
+static int ads122c04_get_vref_monitor(struct ads122c04_st *st, int chan)
+{
+    int adc_result = 0;
+    int vref_mv = 0;
+    if (st->channel_data[chan].vref == ADS122C04_VREF_INTERNAL) {
+        return ADS122C04_VREF_INTERNAL_REF_IN;
+    } else if (st->channel_data[chan].vref == ADS122C04_VREF_EXTERNAL) {
+        adc_result = ads122c04_get_especial_vref(st, ADS122C04_VREF_MON);
+    } else { 
+        adc_result = ads122c04_get_especial_vref(st, ADS122C04_AVDD_AVSS);
+    }
+
+    vref_mv = ads122c04_convert_adc_value_to_millivolts(adc_result, ADS122C04_VREF_INTERNAL_REF_IN, 1) * 4;
+    return vref_mv;
+}
+
+
+static int ads122c04_get_processed_raw(struct ads122c04_st *st, int chan, int *val)
 {
     int vref_mv = 0;
     int temp = 0;
 
     if (st->channel_data[chan].temperature_mode == ADS122C04_TEMPERATURE_MODE_OFF) {
-        if (st->channel_data[chan].vref == ADS122C04_VREF_INTERNAL) {
-            vref_mv = ADS122C04_VREF_INTERNAL_REF_IN;
-            printk(KERN_CRIT "ads122 INTERNAL %d", vref_mv);
-        } else if (st->channel_data[chan].vref == ADS122C04_VREF_EXTERNAL) {
-            vref_mv = ads122c04_get_vref_monitor(st, ADS122C04_VREF_MON);
-            printk(KERN_CRIT "ads122 EXTERNAL %d", vref_mv);
-        } else { 
-            vref_mv = ads122c04_get_vref_monitor(st, ADS122C04_AVDD_AVSS);
-            printk(KERN_CRIT "ads122 AVDD %d", vref_mv);
-        }
+        vref_mv = ads122c04_get_vref_monitor(st, chan);
         return ads122c04_convert_adc_value_to_millivolts(*val, vref_mv, ads122c04_gain_cfg[st->channel_data[chan].gain]);
     } else {
         temp = *val >> 10;
@@ -585,6 +608,18 @@ static int ads122c04_process_raw(struct ads122c04_st *st, int chan, int *val)
     }
 
     return 0;
+}
+
+static int ads122c04_get_scale(struct ads122c04_st *st, int chan)
+{
+    int vref_mv = 0;
+    if (st->channel_data[chan].temperature_mode == ADS122C04_TEMPERATURE_MODE_ON) {
+        return ADS122C04_TEMPERATURE_LSB;
+    } 
+
+    vref_mv = ads122c04_get_vref_monitor(st, chan);
+    
+    return ads122c04_calculate_lsb(vref_mv, st->channel_data[chan].gain);
 }
 
 
@@ -615,7 +650,7 @@ static int ads122c04_read_raw(struct iio_dev *indio_dev,
 		}
 
         if (mask == IIO_CHAN_INFO_PROCESSED) {
-            mvolt = ads122c04_process_raw(st, chan->address, val);
+            mvolt = ads122c04_get_processed_raw(st, chan->address, val);
             *val = mvolt;
         }
 
@@ -624,9 +659,14 @@ static int ads122c04_read_raw(struct iio_dev *indio_dev,
 release_direct:
 		iio_device_release_direct_mode(indio_dev);
         break;
-	case IIO_CHAN_INFO_SCALE:
-		*val = ads122c04_gain_cfg[st->channel_data[chan->address].gain];
+    case IIO_CHAN_INFO_HARDWAREGAIN:
+    	*val = ads122c04_gain_cfg[st->channel_data[chan->address].gain];
 		ret = IIO_VAL_INT;
+		break;
+	case IIO_CHAN_INFO_SCALE:
+		*val = ads122c04_get_scale(st, chan->address);
+        printk(KERN_CRIT "val %d", *val);
+		ret = IIO_VAL_FRACTIONAL_LOG2;
 		break;
 	case IIO_CHAN_INFO_SAMP_FREQ:
 		*val = ads122c04_data_rate[st->channel_data[chan->address].data_rate];
@@ -651,7 +691,7 @@ static int ads122c04_write_raw(struct iio_dev *indio_dev,
 	mutex_lock(&st->lock);
 
 	switch (mask) {
-    case IIO_CHAN_INFO_SCALE:
+    case IIO_CHAN_INFO_HARDWAREGAIN:
 		ret = ads122c04_set_gain(st, chan->address, val);
 		break;
 	case IIO_CHAN_INFO_SAMP_FREQ:
@@ -668,14 +708,14 @@ static int ads122c04_write_raw(struct iio_dev *indio_dev,
 }
 
 
-static IIO_CONST_ATTR_NAMED(ads122c04_scale_available,
-	scale_available, "1 2 4 8 16 32 64 128");
+static IIO_CONST_ATTR_NAMED(ads122c04_hwgain_available,
+	hwgain_available, "1 2 4 8 16 32 64 128");
 
 static IIO_CONST_ATTR_NAMED(ads122c04_sampling_frequency_available,
 	sampling_frequency_available, "20 40 45 90 180 175 350 330 600 660 1000 1200 2000");
 
 static struct attribute *ads122c04_attributes[] = {
-    &iio_const_attr_ads122c04_scale_available.dev_attr.attr,
+    &iio_const_attr_ads122c04_hwgain_available.dev_attr.attr,
 	&iio_const_attr_ads122c04_sampling_frequency_available.dev_attr.attr,
 	NULL,
 };
