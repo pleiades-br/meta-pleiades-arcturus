@@ -6,7 +6,7 @@
  * published by the Free Software Foundation.
  */
 
-#include "myb-imx6ull-14x14-base.dts"
+#include "myd-imx6ull-base-arcturus.dts"
 
 / {
  	sound_card: sound-card {
@@ -44,7 +44,6 @@
 		off-on-delay-us = <20000>;
 		enable-active-high;
 	};
-    /delete-node/ sound;
 };
 
 /delete-node/ &backlight_display;
