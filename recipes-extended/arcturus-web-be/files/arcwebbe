@@ -4,7 +4,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/arcwebbe
 NAME=arcwebbe
 DESC="Arcturus backend service"
-OPTS="--port 8080"
+OPTS="--port 24042"
 
 case "$1" in
   start)
