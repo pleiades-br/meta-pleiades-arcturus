@@ -7,7 +7,7 @@ SRC_URI = " \
             git://github.com/pleiades-br/arcturus-web-backend.git;protocol=https;branch=main \
             file://arcwebbe \
         "
-SRCREV = "902022ba07fb3e81cd75442b634b3b27dd18b69b"
+SRCREV = "a1c113fae7b14d594f89821a88b0f41c358ec66d"
 
 
 S = "${WORKDIR}/git"
