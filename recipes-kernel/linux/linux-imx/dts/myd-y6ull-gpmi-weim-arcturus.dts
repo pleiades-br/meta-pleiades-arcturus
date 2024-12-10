@@ -57,10 +57,6 @@
     status = "disabled";
 };
 
-&fec2 {
-    status = "disabled";
-};
-
 &i2c1 {
     pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c1>;
