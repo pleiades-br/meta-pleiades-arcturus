@@ -9,12 +9,19 @@ SRC_URI = " \
     file://pre_dtmf.wav \
     file://pos_dtmf.wav \
     file://text_output.wav \
+    file://sfrails_service
     "
-SRCREV = "2edcdfb2b0d20fa63a07c534515fb1c626574c5f"
+SRCREV = "f52deb278f1d318eff3bcb696614f4c9fdee9437"
 
 S = "${WORKDIR}/git"
 
-inherit setuptools3
+inherit setuptools3 systemd
+
+SYSTEMD_SERVICE:${PN} = "sftrails.service"
+
+SYSTEMD_SERVICE:${PN} = "sftrails.service"
+INITSCRIPT_NAME = "sftrails_service"
+INITSCRIPT_PARAMS = "defaults 70"
 
 do_install:append () {
     install -d ${D}${bindir}
@@ -27,7 +34,18 @@ do_install:append () {
     install -m 0666 ${WORKDIR}/pre_dtmf.wav ${D}/opt/sftrails/
     install -m 0666 ${WORKDIR}/pos_dtmf.wav ${D}/opt/sftrails/
     install -m 0666 ${WORKDIR}/text_output.wav ${D}/opt/sftrails/
+
+    install -d ${D}${sysconfdir}/init.d
+    install -m 0755 ${WORKDIR}/sfrails_service ${D}${sysconfdir}/init.d
+
+    install -d ${D}${systemd_system_unitdir}
+	install -m 0644 ${S}/doc/systemd/sftrails.service ${D}${systemd_system_unitdir}
+    sed -i -e 's,@SBINDIR@,${sbindir},g' \
+		-e 's,@SYSCONFDIR@,${sysconfdir},g' \
+		-e 's,@BASE_BINDIR@,${base_bindir},g' \
+		${D}${systemd_system_unitdir}/sftrails.service
 }
 
 RDEPENDS:${PN} += " python3-numpy python3-gpiod python3-paho-mqtt espeak"
 FILES:${PN} += "/opt/sftrails/*"
+FILES:${PN} += " ${systemd_system_unitdir}"
