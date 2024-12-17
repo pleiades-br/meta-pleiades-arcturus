@@ -9,7 +9,7 @@ SRC_URI = " \
     file://pre_dtmf.wav \
     file://pos_dtmf.wav \
     file://text_output.wav \
-    file://sfrails_service
+    file://sfrails_service \
     "
 SRCREV = "f52deb278f1d318eff3bcb696614f4c9fdee9437"
 
