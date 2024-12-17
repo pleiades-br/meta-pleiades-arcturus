@@ -3,7 +3,7 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 SRC_URI = "git://github.com/pleiades-br/arcturus-web.git;protocol=http;branch=main"
-SRCREV="31a953b671dd8a2c2ca6fe6f0c6861764c965630"
+SRCREV="7047a74231c2d3b60b7f66e9b9f1010c9e913052"
 
 RDEPENDS:${PN} = " lighttpd"
 
