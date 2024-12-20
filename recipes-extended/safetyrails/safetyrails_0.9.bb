@@ -9,7 +9,7 @@ SRC_URI = " \
     file://pre_dtmf.wav \
     file://pos_dtmf.wav \
     file://text_output.wav \
-    file://sfrails_service \
+    file://sftrails_service \
     "
 SRCREV = "f52deb278f1d318eff3bcb696614f4c9fdee9437"
 
@@ -36,7 +36,7 @@ do_install:append () {
     install -m 0666 ${WORKDIR}/text_output.wav ${D}/opt/sftrails/
 
     install -d ${D}${sysconfdir}/init.d
-    install -m 0755 ${WORKDIR}/sfrails_service ${D}${sysconfdir}/init.d
+    install -m 0755 ${WORKDIR}/sftrails_service ${D}${sysconfdir}/init.d
 
     install -d ${D}${systemd_system_unitdir}
 	install -m 0644 ${S}/doc/systemd/sftrails.service ${D}${systemd_system_unitdir}
