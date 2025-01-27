@@ -586,7 +586,7 @@ static int ads122c04_get_vref_monitor(struct ads122c04_st *st, int chan)
 }
 
 
-static int ads122c04_get_processed_raw(struct ads122c04_st *st, int chan, int *val)
+static int ads122c04_get_processed_raw(struct ads122c04_st *st, const int chan, int *val)
 {
     int vref_mv = 0;
     int temp = 0;
