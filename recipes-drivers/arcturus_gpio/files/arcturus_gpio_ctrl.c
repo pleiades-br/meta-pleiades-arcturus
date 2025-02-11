@@ -34,6 +34,7 @@
 #define EG91_WDISABLE   IMX_GPIO_NR(3,23) //PIN 88-107
 #define EG91_PWR        IMX_GPIO_NR(3,24) //PIN 89-108
 #define EG91_RST        IMX_GPIO_NR(3,25) //PIN 90-109
+#define EG91_GPS        IMX_GPIO_NR(1,5) //PIN 45
 #define AP64350_VBAT    IMX_GPIO_NR(1,18) //PIN 54
 #define PT100_RST       IMX_GPIO_NR(5,2) //PIN 13
 
@@ -100,6 +101,12 @@ static ssize_t arcturus_control_write(struct file *file, const char *userbuf, si
                 _eg91_state = IC_ON;
             }
             arcturus_reset_ic(EG91_PWR, 1, 0, 550);
+        } else if(!strcmp(cmd, "GPS_ON")) {
+            printk(KERN_INFO "EG91 GPS ON operation requested");
+            gpio_set_value(EG91_GPS, 0);
+        } else if(!strcmp(cmd, "GPS_OFF")) {
+            printk(KERN_INFO "EG91 GPS OFF operation requested");
+            gpio_set_value(EG91_GPS, 1);
         } else {
             printk(KERN_ERR "EG91 operation requested not valid %s", cmd);
         }
@@ -222,12 +229,17 @@ static int arcturus_eg91_init(void)
 
     printk(KERN_INFO "EG91 GPIO Control Module loaded\n");
     _eg91_state = IC_ON;
+
+    if (arcturus_gpio_conf(EG91_GPS, "eg91_rst_gpio_control", OUTPUT_DIRECTION, 0)) {
+        goto err;
+    }
     return 0;
 
     err:
         gpio_free(EG91_VBAT);
         gpio_free(EG91_PWR);
         gpio_free(EG91_VBAT);
+        gpio_free(EG91_GPS);
         return RETURN_ERROR;
 }
 
@@ -254,6 +266,7 @@ static int __init arcturus_control_init(void)
         gpio_free(EG91_VBAT);
         gpio_free(EG91_PWR);
         gpio_free(EG91_RST);
+        gpio_free(EG91_GPS);
         gpio_free(AP64350_VBAT);
         gpio_free(PT100_RST);
         return ret;
@@ -269,6 +282,7 @@ static void __exit arcturus_control_exit(void)
     gpio_free(EG91_VBAT);
     gpio_free(EG91_PWR);
     gpio_free(EG91_RST);
+    gpio_free(EG91_GPS);
     gpio_free(AP64350_VBAT);
     gpio_free(PT100_RST);
     printk(KERN_INFO "Arcturus GPIO Control module unloaded\n");
