@@ -284,7 +284,6 @@ static int ads122c04_write_byte(const struct ads122c04_st *st, const u8 cmd)
         return ret;
     }
 
-    msleep(50);
     return 0;
 }
 
@@ -298,7 +297,6 @@ static int ads122c04_write_byte_data(const struct ads122c04_st *st, const u8 cmd
         return ret;
     }
 
-    msleep(50); 
     return 0;
 }
 
