@@ -1,0 +1,29 @@
+# socat-eg91-at.service
+[Unit]
+Description=Socat AT Command Relay for EG91
+After=sys-devices-platform-soc-2100000.bus-21ec000.serial-tty-ttymxc2.device
+Requires=sys-devices-platform-soc-2100000.bus-21ec000.serial-tty-ttymxc2.device
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/socat -d -d pty,raw,echo=0,link=/dev/ttyEG91_AT open:/dev/ttymxc2,raw,echo=0,b115200
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+# socat-eg91-gps.service
+[Unit]
+Description=Socat GPS Relay for EG91
+After=sys-devices-platform-soc-2100000.bus-21ec000.serial-tty-ttymxc2.device
+Requires=sys-devices-platform-soc-2100000.bus-21ec000.serial-tty-ttymxc2.device
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/socat -d -d pty,raw,echo=0,link=/dev/ttyEG91_GPS open:/dev/ttymxc2,raw,echo=0,b115200
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
