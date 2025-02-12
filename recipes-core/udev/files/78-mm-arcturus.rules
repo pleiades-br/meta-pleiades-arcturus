@@ -2,30 +2,28 @@ ACTION!="add|change|move|bind", GOTO="mm_eg91_uart3_end"
 SUBSYSTEMS=="tty", DEVPATH=="/sys/devices/platform/soc/2100000.bus/21ec000.serial"
 LABEL="mm_eg91_uart3_end"
 
-# Rule for ModemManager to handle the device on ttymxc2
-ACTION=="add|change|move", SUBSYSTEM=="tty", KERNEL=="ttymxc2", \
+# Rule for ModemManager to handle the device on ttymxc2 using multiplexing ports
+
+# Quectel EG91 Modem DataPath
+ACTION=="add|change|move", SUBSYSTEM=="tty", KERNEL=="ttyEG91_DATA", \
 ENV{ID_MM_DEVICE_PROCESS}="1", \
 ENV{ID_MM_TTY_BAUDRATE}="115200", \
 ENV{ID_MM_PORT_TYPE_AT_PPP}="1", \
 ENV{ID_MM_TTY_FLOW_CONTROL}="none"
 
 # Quectel EG91 Modem Management Rules
-ACTION=="add|change", SUBSYSTEM=="tty", \
+ACTION=="add|change", SUBSYSTEM=="tty", KERNEL=="ttyEG91_AT", \
 ATTRS{idVendor}=="2c7c", ATTRS{idProduct}=="0191", \
 ATTRS{interface}=="Modem Interface", \
 ENV{ID_MM_DEVICE_PROCESS}="1", \
-ENV{ID_MM_PORT_TYPE_AT_PRIMARY}="1", \
-MODE="0660", GROUP="dialout"
+ENV{ID_MM_PORT_TYPE_AT_PRIMARY}="1"
 
 # Quectel EG91 GPS Port
-ACTION=="add|change", SUBSYSTEM=="tty", \
+ACTION=="add|change", SUBSYSTEM=="tty", KERNEL=="ttyEG91_GPS",\
 ATTRS{idVendor}=="2c7c", ATTRS{idProduct}=="0191", \
 ATTRS{interface}=="GPS Interface", \
-ENV{ID_MM_PORT_TYPE_GPS}="1", \
-MODE="0660", GROUP="dialout"
-
-# Additional ports (if needed)
-ACTION=="add|change", SUBSYSTEM=="tty", \
-ATTRS{idVendor}=="2c7c", ATTRS{idProduct}=="0191", \
 ENV{ID_MM_DEVICE_PROCESS}="1", \
-MODE="0660", GROUP="dialout"
+ENV{ID_MM_PORT_TYPE_GPS}="1"
+
+
+
