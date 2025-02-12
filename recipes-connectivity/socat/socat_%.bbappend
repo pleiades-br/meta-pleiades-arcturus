@@ -18,3 +18,5 @@ do_install:append() {
 
 SYSTEMD_SERVICE:${PN} = "socat-eg91-at.service socat-eg91-gps.service"
 SYSTEMD_AUTO_ENABLE = "enable"
+
+FILES:${PN} += " ${systemd_system_unitdir}"
