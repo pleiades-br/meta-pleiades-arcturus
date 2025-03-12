@@ -40,7 +40,7 @@
 
 #define DEVICE_NAME "arcturus-gpio-control"
 
-
+static int arcturus_major_number = 0;
 static unsigned short int _eg91_state = IC_OFF;
 static unsigned short int _pt100_state = IC_OFF;
 static unsigned short int _ap64350_state = IC_OFF;
@@ -145,7 +145,7 @@ static int arcturus_gpio_conf(const int gpio,
 {
     int ret = RETURN_OK;
     
-    ret = gpio_request(gpio, "name");
+    ret = gpio_request(gpio, name);
     if (ret) {
         printk(KERN_ERR "Unable to request GPIO %d - %s\n", gpio, name);
         return ret;
@@ -248,37 +248,58 @@ static int __init arcturus_control_init(void)
 {
     int ret = RETURN_OK;
 
+    printk(KERN_INFO "Arcturus GPIO Control: Initializing...\n");
+
     if (arcturus_eg91_init()) {
         printk(KERN_INFO "EG91 GPIO Control failed to initialize\n");
+        goto err_eg91;
+    } else {
+        printk(KERN_INFO "EG91 GPIO Control initialized successfully\n");
     }
 
     if (arcturus_ap64350_init()) {
         printk(KERN_INFO "AP64350 GPIO Control failed to initialize\n");
+        goto err_ap64350;
+    } else {
+        printk(KERN_INFO "AP64350 GPIO Control initialized successfully\n");
     }
 
     if (arcturus_pt100_init()) {
         printk(KERN_INFO "PT100 GPIO Control failed to initialize\n");
+        goto err_pt100;
+    } else {
+        printk(KERN_INFO "PT100 GPIO Control initialized successfully\n");
     }
 
+    printk(KERN_INFO "Arcturus GPIO Control: Registering character device...\n");
     ret = register_chrdev(0, DEVICE_NAME, &arcturus_gpio_control_fops);
     if (ret < 0) {
         printk(KERN_ERR "Unable to register Arcturus Gpio Control device\n");
-        gpio_free(EG91_VBAT);
-        gpio_free(EG91_PWR);
-        gpio_free(EG91_RST);
-        gpio_free(EG91_GPS);
-        gpio_free(AP64350_VBAT);
-        gpio_free(PT100_RST);
-        return ret;
+        goto err_chrdev;
     }
+    arcturus_major_number = ret; // Store the major number
+    printk(KERN_INFO "Arcturus GPIO Control: Character device registered with major number %d\n", arcturus_major_number);
 
     printk(KERN_INFO "Arcturus GPIO Control module loaded\n");
     return 0;
+
+err_chrdev:
+    //Free the gpios
+err_pt100:
+    gpio_free(PT100_RST);
+err_ap64350:
+    gpio_free(AP64350_VBAT);
+err_eg91:
+    gpio_free(EG91_VBAT);
+    gpio_free(EG91_PWR);
+    gpio_free(EG91_RST);
+    gpio_free(EG91_GPS);
+    return ret;
 }
 
 static void __exit arcturus_control_exit(void)
 {
-    unregister_chrdev(0, DEVICE_NAME);
+    unregister_chrdev(arcturus_major_number, DEVICE_NAME);
     gpio_free(EG91_VBAT);
     gpio_free(EG91_PWR);
     gpio_free(EG91_RST);
