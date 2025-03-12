@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 SRC_URI:append:plds-myd-y6ull = "\
     file://78-mm-arcturus.rules \
     file://60-mm-imx-uart-whitelist.rules \
-    file://9-arcturus-gpio.rules \
+    file://79-arcturus-gpio.rules \
 "
 
 
