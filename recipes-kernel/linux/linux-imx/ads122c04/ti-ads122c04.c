@@ -468,7 +468,8 @@ static int ads122c04_calibrate_offset(const struct ads122c04_st *st, const uint8
     if (offset_calibration == 0)
         return 0;
 
-    printk(KERN_CRIT "ads122c04_calibrate_offset %d %d\n", offset_calibration, tentatives);
+    printk(KERN_INFO "ADS122c04: ads122c04_calibrate_offset---\n \
+         offset_calibration:%d\n tentatives:%d\n", offset_calibration, tentatives);
     offset_calibration = (int32_t) div_s64(offset_calibration, tentatives);
     return 0;
 }
@@ -681,7 +682,9 @@ int32_t adc_to_millivolts(int32_t adc_value, int32_t vref_mv, int32_t gain) {
     // Convert ADC value to voltage
     // We need to use 64-bit to prevent overflow in multiplication
     int64_t mv_fixed = (int64_t)adc_value * lsb_fixed;
-    printk(KERN_CRIT "adc_to_millivolts %d %d %d",lsb_fixed, adc_value, mv_fixed);
+    printk(KERN_INFO "ADS122c04: adc_to_millivolts results--- \n \
+         lsb_fixed:%d \n adc_value:%d \n mv_fixed %d",
+        lsb_fixed, adc_value, mv_fixed);
     // Convert back from fixed-point to regular integer (millivolts)
     return (int32_t)(mv_fixed >> FIXED_POINT_SHIFT);
 }
@@ -695,7 +698,9 @@ static uint32_t ads122c04_calculate_vref(struct ads122c04_st *st, const int mux)
     ads122c04_get_special_vref_monitor(st, mux, &adc_result);
 
     vref_mv = adc_to_millivolts(adc_result, ADS122C04_VREF_INTERNAL_REF_IN, 1);
-    printk(KERN_CRIT "ads122c04_get_scale %d %d %d %d",adc_result, vref_mv, vref_mv * 4, offset_calibration);
+    printk(KERN_INFO "ADS122c04: ads122c04_get_scale----- \n \
+         adc_result:%d\n vref_read:%d\n vref_mv:%d\n offset_calibration:%d",
+         adc_result, vref_mv, vref_mv * 4, offset_calibration);
     /* Datasheet 8.3.9 the final result is (V(REFP) – V(REFN)) / 4 or 
     (AVDD – AVSS) / 4*/
     return vref_mv * 4;
