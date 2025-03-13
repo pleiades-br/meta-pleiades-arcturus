@@ -87,11 +87,11 @@ static ssize_t arcturus_control_write(struct file *file, const char *userbuf, si
 
     if (!strcmp(icname, "EG91")) {
         if(!strcmp(cmd, "PWR")) {
-            printk(KERN_INFO "EG91 Power %s requested", _eg91_state == IC_OFF? "on" : "off");
+            printk(KERN_INFO "Arcturus GPIO Control: EG91 Power %s requested", _eg91_state == IC_OFF? "on" : "off");
             _eg91_state == IC_OFF? gpio_set_value(EG91_PWR, 0) : gpio_set_value(EG91_PWR, 1);
             _eg91_state = (_eg91_state == IC_OFF? IC_ON : IC_OFF);
         } else if(!strcmp(cmd, "RST")) {
-            printk(KERN_INFO "EG91 reset operation requested");
+            printk(KERN_INFO "Arcturus GPIO Control: EG91 reset operation requested");
             /* 
                 If the power is off and a reset requested by user, 
                 lets turn on the EG91 
@@ -102,30 +102,30 @@ static ssize_t arcturus_control_write(struct file *file, const char *userbuf, si
             }
             arcturus_reset_ic(EG91_PWR, 1, 0, 550);
         } else if(!strcmp(cmd, "GPS_ON")) {
-            printk(KERN_INFO "EG91 GPS ON operation requested");
+            printk(KERN_INFO "Arcturus GPIO Control: EG91 GPS ON operation requested");
             gpio_set_value(EG91_GPS, 0);
         } else if(!strcmp(cmd, "GPS_OFF")) {
-            printk(KERN_INFO "EG91 GPS OFF operation requested");
+            printk(KERN_INFO "Arcturus GPIO Control: EG91 GPS OFF operation requested");
             gpio_set_value(EG91_GPS, 1);
         } else {
-            printk(KERN_ERR "EG91 operation requested not valid %s", cmd);
+            printk(KERN_ERR "Arcturus GPIO Control: EG91 operation requested not valid %s", cmd);
         }
     } else if(!strcmp(icname, "PT100")) {
         if(!strcmp(cmd, "RST")) {
             arcturus_reset_ic(PT100_RST, 1, 0, 200);
         } else {
-            printk(KERN_ERR "PT100 operation requested not valid %s", cmd);
+            printk(KERN_ERR "Arcturus GPIO Control: PT100 operation requested not valid %s", cmd);
         }
     } else if(!strcmp(icname, "AP64350")) {
         if(!strcmp(cmd, "PWR")) {
-            printk(KERN_INFO "AP64350 Power %s requested", _ap64350_state == IC_OFF? "on" : "off");
+            printk(KERN_INFO "Arcturus GPIO Control: AP64350 Power %s requested", _ap64350_state == IC_OFF? "on" : "off");
             _ap64350_state == IC_OFF? gpio_set_value(AP64350_VBAT, 1) : gpio_set_value(AP64350_VBAT, 0);
             _ap64350_state = (_ap64350_state == IC_OFF? IC_ON : IC_OFF);
         } else {
-            printk(KERN_ERR "AP64350 operation requested not valid %s", cmd);
+            printk(KERN_ERR "Arcturus GPIO Control: AP64350 operation requested not valid %s", cmd);
         }
     } else {
-        printk(KERN_ERR "No IC name %s found", icname);
+        printk(KERN_ERR "Arcturus GPIO Control: No IC name %s found", icname);
     }
 
     return count;
@@ -147,7 +147,7 @@ static int arcturus_gpio_conf(const int gpio,
     
     ret = gpio_request(gpio, name);
     if (ret) {
-        printk(KERN_ERR "Unable to request GPIO %d - %s\n", gpio, name);
+        printk(KERN_ERR "Arcturus GPIO Control: Unable to request GPIO %d - %s\n", gpio, name);
         return ret;
     }
 
@@ -158,7 +158,7 @@ static int arcturus_gpio_conf(const int gpio,
     }
 
     if (ret) {
-            printk(KERN_ERR "Unable to set GPIO %d to %s direction - %s\n", 
+            printk(KERN_ERR "Arcturus GPIO Control: Unable to set GPIO %d to %s direction - %s\n", 
                     gpio, (direction == INPUT_DIRECTION ? "Input" : "Output"), name);
             gpio_free(gpio);
     }
@@ -180,7 +180,6 @@ static int arcturus_pt100_init(void)
     // Simulating pwr button
     arcturus_reset_ic(PT100_RST, 1, 0, 200);
    
-    printk(KERN_INFO "PT100 GPIO PT100_rst_gpio_control configured\n");
     _pt100_state = IC_ON;
     return 0;
     
@@ -199,7 +198,6 @@ static int arcturus_ap64350_init(void)
 
     msleep(30);
     
-    printk(KERN_INFO "AP64350 GPIO AP64350_vbat_gpio_control configured\n");
     _ap64350_state = IC_ON;
     return 0;
     
@@ -227,7 +225,6 @@ static int arcturus_eg91_init(void)
     // Simulating pwr button
     arcturus_reset_ic(EG91_PWR, 1, 0, 550);
 
-    printk(KERN_INFO "EG91 GPIO Control Module loaded\n");
     _eg91_state = IC_ON;
 
     if (arcturus_gpio_conf(EG91_GPS, "eg91_rst_gpio_control", OUTPUT_DIRECTION, 0)) {
@@ -251,30 +248,30 @@ static int __init arcturus_control_init(void)
     printk(KERN_INFO "Arcturus GPIO Control: Initializing...\n");
 
     if (arcturus_eg91_init()) {
-        printk(KERN_INFO "EG91 GPIO Control failed to initialize\n");
+        printk(KERN_INFO "Arcturus GPIO Control: EG91 GPIO Control failed to initialize\n");
         goto err_eg91;
     } else {
-        printk(KERN_INFO "EG91 GPIO Control initialized successfully\n");
+        printk(KERN_INFO "Arcturus GPIO Control: EG91 GPIO Control initialized successfully\n");
     }
 
     if (arcturus_ap64350_init()) {
-        printk(KERN_INFO "AP64350 GPIO Control failed to initialize\n");
+        printk(KERN_INFO "Arcturus GPIO Control: AP64350 GPIO Control failed to initialize\n");
         goto err_ap64350;
     } else {
-        printk(KERN_INFO "AP64350 GPIO Control initialized successfully\n");
+        printk(KERN_INFO "Arcturus GPIO Control: AP64350 GPIO Control initialized successfully\n");
     }
 
     if (arcturus_pt100_init()) {
-        printk(KERN_INFO "PT100 GPIO Control failed to initialize\n");
+        printk(KERN_INFO "Arcturus GPIO Control: PT100 GPIO Control failed to initialize\n");
         goto err_pt100;
     } else {
-        printk(KERN_INFO "PT100 GPIO Control initialized successfully\n");
+        printk(KERN_INFO "Arcturus GPIO Control: PT100 GPIO Control initialized successfully\n");
     }
 
     printk(KERN_INFO "Arcturus GPIO Control: Registering character device...\n");
     ret = register_chrdev(0, DEVICE_NAME, &arcturus_gpio_control_fops);
     if (ret < 0) {
-        printk(KERN_ERR "Unable to register Arcturus Gpio Control device\n");
+        printk(KERN_ERR "Arcturus GPIO Control: Unable to register Arcturus Gpio Control device\n");
         goto err_chrdev;
     }
     arcturus_major_number = ret; // Store the major number
