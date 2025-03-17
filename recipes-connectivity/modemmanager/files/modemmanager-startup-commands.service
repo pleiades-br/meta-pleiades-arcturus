@@ -1,0 +1,9 @@
+# modemmanager-startup-commands.service
+[Unit]
+Description=Enable modem after ModemManager starts
+After=ModemManager.service
+Requires=ModemManager.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sudo /usr/bin/mmcli -m 0 --command='AT+QGPS=1'
