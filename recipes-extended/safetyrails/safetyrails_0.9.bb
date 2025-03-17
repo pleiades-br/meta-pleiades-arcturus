@@ -11,7 +11,7 @@ SRC_URI = " \
     file://text_output.wav \
     file://sftrails_service \
     "
-SRCREV = "b2fa919c4341e9b1ef8a2137af4e1df85f667197"
+SRCREV = "960d141cac6e9e35e21069c4683e18185d80247e"
 
 S = "${WORKDIR}/git"
 

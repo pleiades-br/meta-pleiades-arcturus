@@ -105,9 +105,9 @@
         ti,idac1-route = <3>;
         ti,idac2-route = <4>;
 
-        ch0: channel3@3 {
-            reg = <0x3>;
-            ti,gain = <3>;
+        ch0: channel0@0 {
+            reg = <0x0>;
+            ti,gain = <4>;
             ti,datarate = <0>;
             ti,vref = <1>;
         };
