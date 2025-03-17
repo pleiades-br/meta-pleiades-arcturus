@@ -1,7 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRC_URI:append = " \
-    file://modemmanager-startup-commands.service \
+    file://mm-startup-cmds.service \
 "
 
 PACKAGECONFIG =  "vala mbim qmi at \
@@ -13,12 +13,12 @@ inherit systemd
 do_install:append() {
     if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
         install -d ${D}${systemd_system_unitdir}
-        install -m 0644 ${WORKDIR}/modemmanager-startup-commands.service ${D}${systemd_system_unitdir}/
+        install -m 0644 ${WORKDIR}/mm-startup-cmds.service ${D}${systemd_system_unitdir}/
     fi
 }
 
-SYSTEMD_SERVICE:${PN} += " \
-    modemmanager-startup-commands.service \
+SYSTEMD_SERVICE:${PN} = " \
+    mm-startup-cmds.service \
 "
 SYSTEMD_AUTO_ENABLE = "enable"
 
