@@ -1,7 +1,7 @@
 DESCRIPTION = "GPS scripts that will take care of modemmanager if the lte has only one uart \
     connection "
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=4a4dcba7e9f35ff16fd3c325ea239fd6"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 
@@ -28,5 +28,7 @@ do_install() {
 SYSTEMD_SERVICE:${PN} += " \
     mm-startup-cmds.service \
 "
+
+RDEPENDS:${PN} += "bash modemmanager"
 
 FILES:${PN} += " ${systemd_system_unitdir}"
