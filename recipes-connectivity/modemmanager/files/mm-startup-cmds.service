@@ -1,9 +1,15 @@
 # mm-startup-cmds.service
 [Unit]
 Description=Enable modem after ModemManager starts
+Before=NetworkManager.service
 After=ModemManager.service
 Requires=ModemManager.service
 
 [Service]
 Type=simple
-ExecStart=mmcli -m 0 --command=AT+QGPS=1
+ExecStart=/usr/bin/mm-gps-start.sh
+# Add other commands as needed
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
